@@ -1928,6 +1928,39 @@ h3 {
 @media (max-width: 1024px) {
   .stat-grid { grid-template-columns: repeat(3, 1fr); }
   .chip-2 { left: -6px; }
+
+  /* Секции с карточками складываются раньше — чтобы не разъезжались и не были огромными */
+  .feature-row,
+  .security-grid,
+  .live-grid,
+  .ai-grid { grid-template-columns: 1fr; gap: clamp(28px, 5vw, 44px); }
+
+  .feature-row-flip .feature-copy { order: 1; }
+  .feature-row-flip .feature-visual { order: 2; }
+
+  /* карточку-панель ограничиваем и центрируем, чтобы не растягивалась во всю ширину */
+  .feature-visual { width: 100%; max-width: 460px; margin-inline: auto; }
+
+  /* веер заявок → аккуратный вертикальный стек, без горизонтального выхода за экран */
+  .panel-deck { padding: 0; max-width: 460px; margin-inline: auto; }
+  .deck-cards { display: flex; flex-direction: column; gap: 14px; }
+  .deck-layer {
+    position: static;
+    z-index: auto;
+    will-change: auto;
+    transform: none !important;
+  }
+  .deck-cards .panel {
+    transform: none !important;
+    cursor: default;
+    transition: none;
+  }
+  .deck-cards .panel.demoting { animation: none; }
+  .deck-layer.on-top .panel {
+    box-shadow:
+      0 2px 6px rgba(10, 11, 16, 0.04),
+      0 30px 70px -28px rgba(18, 48, 158, 0.3);
+  }
 }
 
 @media (max-width: 880px) {
