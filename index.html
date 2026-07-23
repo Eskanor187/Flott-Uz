@@ -1,125 +1,74 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Flott — платформа цифрового факторинга</title>
-<meta name="description" content="Flott автоматизирует факторинг от заявки до выплаты: банк, поставщик и покупатель — на одной платформе. Деньги за часы, подпись E-IMZO, скоринг в реальном времени.">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
-<link rel="stylesheet" href="style.css">
-<link rel="icon" type="image/svg+xml" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect width="32" height="32" rx="8" fill="%232353E8"/><path d="M20.5 6c-3.6 0-5 2.2-5 5.6v9c0 2.6-1 4.4-3.5 4.9" fill="none" stroke="white" stroke-width="3" stroke-linecap="round"/><path d="M9.5 13.5h13M9.5 19h10" stroke="white" stroke-width="3" stroke-linecap="round"/></svg>'>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Flott — Цифровой факторинг в Узбекистане</title>
+  <meta name="description" content="Flott автоматизирует факторинг от заявки до выплаты: банк, поставщик и покупатель на одной платформе. Деньги за часы, подпись E-IMZO, скоринг в реальном времени.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
-<!-- ===== Header ===== -->
-<header class="site-header" id="top">
-  <div class="container header-inner">
-    <a href="#top" class="brand" aria-label="Flott — на главную">
-      <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true">
-        <path d="M20.5 5c-3.8 0-5.2 2.3-5.2 5.8v9.6c0 2.8-1.1 4.7-3.8 5.3" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round"/>
-        <path d="M9 13.2h14M9 19h10.5" stroke="currentColor" stroke-width="3.2" stroke-linecap="round"/>
-      </svg>
-      <span class="brand-word">flott</span>
+<header class="navbar" id="navbar">
+    <a class="nav-logo" href="#">
+      <span class="logo-badge">f</span>
+      <span class="logo-wordmark">flott</span>
     </a>
-    <nav class="site-nav" aria-label="Основная навигация">
+
+    <nav class="nav-links" id="nav-links">
+      <a href="#">Главная</a>
       <a href="#how">Как это работает</a>
       <a href="#ai">Flott AI</a>
       <a href="#roles">Возможности</a>
       <a href="#live">Уже в работе</a>
       <a href="#security">Безопасность</a>
     </nav>
-    <div class="header-cta">
-      <a href="#cta" class="btn btn-primary btn-sm">Запросить демо</a>
-      <button class="nav-toggle" aria-label="Открыть меню" aria-expanded="false">
-        <span></span><span></span>
+
+    <div class="nav-right">
+      <button class="nav-cta" type="button">Запросить демо</button>
+      <button class="nav-burger" id="nav-burger" type="button" aria-label="Открыть меню" aria-expanded="false" aria-controls="nav-links">
+        <span></span>
+        <span></span>
+        <span></span>
       </button>
     </div>
-  </div>
-</header>
+  </header>
 
 <main>
-
-<!-- ===== Hero ===== -->
-<section class="hero">
-  <div class="hero-media" id="safeScene" aria-hidden="true">
-    <div class="safe-float">
-      <video class="safe-clip on" id="safeOpen" src="assets/safe-opening.mp4" muted playsinline preload="auto"></video>
-      <video class="safe-clip" id="safeClose" src="assets/safe-closing.mp4" muted playsinline preload="auto"></video>
-    </div>
-  </div>
-  <div class="container">
-    <div class="hero-copy">
-      <p class="eyebrow reveal">Цифровой факторинг · Узбекистан</p>
-      <h1 class="reveal d1">Деньги <em>сейчас</em>,<br>не&nbsp;через месяцы.</h1>
-      <p class="hero-sub reveal d2">Flott — платформа цифрового факторинга. Автоматизирует сделку
-        от&nbsp;заявки до&nbsp;выплаты для банка, поставщика и&nbsp;покупателя: счета из&nbsp;Налогового
-        комитета, скоринг в&nbsp;реальном времени, юридически значимая подпись E-IMZO.</p>
-      <div class="hero-actions reveal d3">
-        <a href="#cta" class="btn btn-primary">Запросить демо</a>
-        <a href="#how" class="btn btn-ghost">Как это работает</a>
+<section class="vhero">
+      <div class="hero-bg" aria-hidden="true">
+        <video class="hero-video" id="hero-video" src="hero.mp4" autoplay muted playsinline preload="auto"></video>
       </div>
-      <div class="safe-toggle reveal d4" role="group" aria-label="Сравнение: с Flott и без">
-        <button class="safe-btn" id="btnWithFlott" type="button">Работаю с Flott</button>
-        <button class="safe-btn active" id="btnWithoutFlott" type="button">Без Flott</button>
-      </div>
-      <p class="safe-note reveal d4" id="safeNote">Без Flott деньги неделями заперты в дебиторке.</p>
-    </div>
-  </div>
-</section>
 
-<!-- ===== Product mockup ===== -->
-<section class="hero-product">
-  <div class="container">
-    <div class="hero-visual" aria-hidden="true">
-      <div class="browser">
-        <div class="browser-bar">
-          <span class="dot"></span><span class="dot"></span><span class="dot"></span>
-          <span class="url">flott.uz · Портфель банка</span>
-        </div>
-        <div class="browser-body">
-          <div class="stat-grid">
-            <div class="stat">
-              <span class="stat-label">Сумма всех сделок</span>
-              <span class="stat-value accent">9 496 004 479,2 <small>UZS</small></span>
-            </div>
-            <div class="stat">
-              <span class="stat-label">Средняя ставка</span>
-              <span class="stat-value">4,38%</span>
-            </div>
-            <div class="stat">
-              <span class="stat-label">Комиссия</span>
-              <span class="stat-value">415 451 588 <small>UZS</small></span>
-            </div>
-            <div class="stat">
-              <span class="stat-label">Сделок</span>
-              <span class="stat-value">21</span>
-            </div>
-            <div class="stat">
-              <span class="stat-label">Клиентов</span>
-              <span class="stat-value">4</span>
-            </div>
-            <div class="stat">
-              <span class="stat-label">Просроченных</span>
-              <span class="stat-value">0</span>
-            </div>
-          </div>
-          <div class="mini-table">
-            <div class="mini-row mini-head"><span>По отраслям</span><span>Сделки</span><span>Сумма</span></div>
-            <div class="mini-row"><span>Оптовая торговля продуктами питания</span><span>1</span><span>8 157 781 400 UZS</span></div>
-            <div class="mini-row"><span>Переработка молока, производство сыра</span><span>1</span><span>774 486 848,8 UZS</span></div>
-            <div class="mini-row"><span>Торговля кондитерскими изделиями</span><span>1</span><span>350 784 000 UZS</span></div>
+      <div class="hero-inner">
+
+        <div class="hero-text" id="hero-text">
+          <p class="v-eyebrow">ЦИФРОВОЙ ФАКТОРИНГ · УЗБЕКИСТАН</p>
+          <h1 class="headline"><span class="line">Деньги сейчас,</span> <span class="line">не через месяцы</span></h1>
+          <p class="subtext">Flott — платформа цифрового факторинга. Автоматизирует сделку от заявки до выплаты для банка, поставщика и покупателя: счета из Налогового комитета, скоринг в реальном времени, юридически значимая подпись E-IMZO.</p>
+          <div class="hero-buttons">
+            <button class="v-btn v-btn-primary" type="button">ЗАПРОСИТЬ ДЕМО</button>
+            <button class="v-btn v-btn-secondary" type="button">КАК ЭТО РАБОТАЕТ?</button>
           </div>
         </div>
+
       </div>
-      <div class="chip chip-1"><span class="chip-ic ok">✓</span> Подпись E-IMZO — юридически значима</div>
-      <div class="chip chip-2"><span class="chip-ic">→</span> Выплата поставщику · 3 ч 12 мин</div>
-      <div class="chip chip-3"><span class="chip-ic pulse">●</span> Риск-профиль обновляется в реальном времени</div>
-    </div>
-  </div>
-</section>
+
+      <button class="mute-toggle" id="mute-toggle" type="button" aria-label="Включить звук" aria-pressed="false">
+        <svg class="icon-off" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" fill="currentColor" stroke="none"></polygon>
+          <line x1="15" y1="9" x2="21" y2="15"></line>
+          <line x1="21" y1="9" x2="15" y2="15"></line>
+        </svg>
+        <svg class="icon-on" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" fill="currentColor" stroke="none"></polygon>
+          <path d="M15.5 8.5a5 5 0 0 1 0 7"></path>
+          <path d="M18.5 5.5a9 9 0 0 1 0 13"></path>
+        </svg>
+      </button>
+    </section>
 
 <!-- ===== Trust marquee ===== -->
 <section class="marquee-strip" aria-label="Партнёры и регистрации">
@@ -284,88 +233,67 @@
   </div>
 </section>
 
-<!-- ===== Demo Dashboard Section ===== -->
-<section class="demo-dashboard" id="demo">
-    <div class="container">
-        <div class="section-header">
-            <div class="preview-badge">Предпросмотр продукта · Не реальные данные</div>
-            <h2 class="section-title">Ознакомьтесь с панелью Flott</h2>
-            <p class="section-subtitle">Ваш командный центр для управления денежным потоком</p>
-        </div>
-        <div class="dd-wrap">
-            <div class="dd-container">
-                <!-- Header -->
-                <div class="dd-header">
-                    <div class="dd-greeting">
-                        <span class="dd-hi">Доброе утро, Альберт 👋</span>
-                        <span class="dd-agent">Агент денежного потока FLOTT сегодня работает за вас.</span>
-                    </div>
-                    <div class="dd-header-actions">
-                        <div class="dd-pop">
-                            <button class="dd-iconbtn" id="ddBellBtn" type="button" aria-label="Уведомления">
-                                <i class="fas fa-bell"></i>
-                                <span class="dd-notif-dot">3</span>
-                            </button>
-                            <div class="dd-dropdown dd-notif" id="ddNotifMenu" hidden>
-                                <div class="dd-dropdown-head"><h3>Уведомления</h3></div>
-                                <div class="dd-notif-list">
-                                    <div class="dd-notif-item unread">
-                                        <span class="dd-notif-mark"></span>
-                                        <div><div class="dd-notif-title">Получен платеж</div><div class="dd-notif-msg">INV-2043 оплачен - UZS 320M</div><div class="dd-notif-time">5 мин назад</div></div>
-                                    </div>
-                                    <div class="dd-notif-item unread">
-                                        <span class="dd-notif-mark"></span>
-                                        <div><div class="dd-notif-title">Счет просрочен</div><div class="dd-notif-msg">INV-2041 просрочен на 3 дня</div><div class="dd-notif-time">2 часов назад</div></div>
-                                    </div>
-                                    <div class="dd-notif-item unread">
-                                        <span class="dd-notif-mark"></span>
-                                        <div><div class="dd-notif-title">Финансирование одобрено</div><div class="dd-notif-msg">Доступна кредитная линия UZS 500M</div><div class="dd-notif-time">1 дней назад</div></div>
-                                    </div>
-                                    <div class="dd-notif-item">
-                                        <div><div class="dd-notif-title">Предупреждение о денежном потоке</div><div class="dd-notif-msg">Прогнозируемый дефицит через 15 дней</div><div class="dd-notif-time">2 дней назад</div></div>
-                                    </div>
-                                </div>
-                                <div class="dd-dropdown-foot"><button type="button">Посмотреть все уведомления</button></div>
-                            </div>
-                        </div>
-                        <div class="dd-pop">
-                            <button class="dd-iconbtn" id="ddUserBtn" type="button" aria-label="Аккаунт">
-                                <i class="fas fa-user"></i>
-                            </button>
-                            <div class="dd-dropdown dd-user" id="ddUserMenu" hidden>
-                                <div class="dd-user-head">
-                                    <div class="dd-user-avatar"><i class="fas fa-user"></i></div>
-                                    <div><div class="dd-user-name">Альберт Иванов</div><div class="dd-user-email">albert@gmail.com</div></div>
-                                </div>
-                                <div class="dd-user-links">
-                                    <button type="button"><i class="fas fa-user"></i><span>Мой профиль</span></button>
-                                    <button type="button"><i class="fas fa-cog"></i><span>Настройки аккаунта</span></button>
-                                    <button type="button"><i class="fas fa-bell"></i><span>Настройки уведомлений</span></button>
-                                </div>
-                                <div class="dd-user-foot"><button type="button" class="dd-signout">Выйти</button></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+<!-- ===== Cabinet demo ===== -->
+<section class="section" id="cabinet">
+  <div class="container">
+    <p class="eyebrow reveal">Как это работает — вживую</p>
+    <h2 class="reveal d1">Кабинет клиента Flott.</h2>
+    <p class="section-sub reveal d2">Интерактивная демонстрация: переключайте разделы —
+      так платформа выглядит изнутри.</p>
 
-                <!-- Body -->
-                <div class="dd-body">
-                    <aside class="dd-sidebar">
-                        <nav class="dd-nav" id="ddNav">
-                            <button class="dd-tab active" type="button" data-section="overview"><i class="fas fa-home"></i><span>Обзор</span></button>
-                            <button class="dd-tab" type="button" data-section="cashFlow"><i class="fas fa-chart-line"></i><span>Денежный поток</span></button>
-                            <button class="dd-tab" type="button" data-section="invoices"><i class="fas fa-file-invoice"></i><span>Счета</span></button>
-                            <button class="dd-tab" type="button" data-section="suppliers"><i class="fas fa-truck"></i><span>Поставщики</span></button>
-                            <button class="dd-tab" type="button" data-section="customers"><i class="fas fa-users"></i><span>Клиенты</span></button>
-                            <button class="dd-tab" type="button" data-section="financing"><i class="fas fa-hand-holding-usd"></i><span>Финансирование</span></button>
-                            <button class="dd-tab" type="button" data-section="settings"><i class="fas fa-cog"></i><span>Настройки</span></button>
-                        </nav>
-                    </aside>
-                    <main class="dd-main" id="ddMain"></main>
-                </div>
-            </div>
+    <div class="cab reveal d3">
+      <div class="cab-top">
+        <div class="cab-hello">
+          <span class="cab-hi">Доброе утро, Альберт 👋</span>
+          <span class="cab-hint">Агент денежного потока Flott сегодня работает за вас.</span>
         </div>
+        <div class="cab-icons">
+          <button class="cab-icbtn" type="button" aria-label="Уведомления">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+            <span class="cab-dot">3</span>
+          </button>
+          <button class="cab-icbtn" type="button" aria-label="Профиль">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="cab-body">
+        <aside class="cab-side">
+          <nav class="cab-nav" id="cabNav" aria-label="Разделы кабинета">
+            <button class="cab-tab" type="button" data-tab="overview">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/><path d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
+              <span>Обзор</span>
+            </button>
+            <button class="cab-tab" type="button" data-tab="cashflow">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+              <span>Денежный поток</span>
+            </button>
+            <button class="cab-tab" type="button" data-tab="invoices">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg>
+              <span>Счета</span>
+            </button>
+            <button class="cab-tab active" type="button" data-tab="suppliers">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"/><path d="M15 18H9"/><path d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.624l-3.48-4.35A1 1 0 0 0 17.52 8H14"/><circle cx="17" cy="18" r="2"/><circle cx="7" cy="18" r="2"/></svg>
+              <span>Поставщики</span>
+            </button>
+            <button class="cab-tab" type="button" data-tab="clients">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+              <span>Клиенты</span>
+            </button>
+            <button class="cab-tab" type="button" data-tab="financing">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" x2="12" y1="2" y2="22"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+              <span>Финансирование</span>
+            </button>
+            <button class="cab-tab" type="button" data-tab="settings">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+              <span>Настройки</span>
+            </button>
+          </nav>
+        </aside>
+        <main class="cab-main" id="cabMain"></main>
+      </div>
     </div>
+  </div>
 </section>
 
 <!-- ===== Deep dives ===== -->
@@ -641,10 +569,8 @@
     </div>
   </div>
 </section>
-
 </main>
 
-<!-- ===== Footer ===== -->
 <footer class="site-footer">
   <div class="container">
     <div class="footer-top">
@@ -703,7 +629,18 @@
   </div>
 </dialog>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<noscript>
+    <style>
+      .navbar, .nav-logo, .nav-links a, .nav-cta, .nav-burger,
+      .hero-text > *, .headline .line {
+        opacity: 1 !important;
+        transform: none !important;
+        animation: none !important;
+      }
+      .navbar { transform: translateX(-50%) !important; }
+    </style>
+  </noscript>
+
 <script src="script.js"></script>
 </body>
 </html>

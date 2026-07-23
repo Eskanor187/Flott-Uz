@@ -1,17 +1,170 @@
+// Seconds into hero.mp4 when the reveal fires: the navbar unfolds from a
+// thin center line while the hero text staggers in alongside it — all
+// choreographed with CSS animation-delays in styles.css, static ~1.85s
+// after this moment.
+const REVEAL_TIME = 2;
+
+// Flat delay before revealing everything when the video can't load or autoplay.
+const FALLBACK_DELAY = 1500;
+
+let hasRevealed = false;
+
+const video = document.getElementById('hero-video');
+const navbar = document.getElementById('navbar');
+const heroText = document.getElementById('hero-text');
+const muteToggle = document.getElementById('mute-toggle');
+const burger = document.getElementById('nav-burger');
+const navLinks = document.getElementById('nav-links');
+
+function reveal() {
+  if (hasRevealed) return;
+  hasRevealed = true;
+  navbar.classList.add('v-reveal');
+  heroText.classList.add('v-reveal');
+}
+
+function scheduleFallbackReveal() {
+  setTimeout(reveal, FALLBACK_DELAY);
+}
+
+if (video) {
+  video.addEventListener('timeupdate', () => {
+    if (video.currentTime >= REVEAL_TIME) reveal();
+  });
+
+  // If the clip ever gets re-exported shorter than REVEAL_TIME, 'ended'
+  // still fires — never leave the page hidden.
+  video.addEventListener('ended', reveal);
+  video.addEventListener('error', scheduleFallbackReveal);
+
+  // The autoplay attribute usually handles playback; calling play() as well
+  // gives us a rejection signal when the browser blocks autoplay.
+  const playAttempt = video.play();
+  if (playAttempt !== undefined) {
+    playAttempt.catch(scheduleFallbackReveal);
+  }
+
+  // Belt and braces: if playback never actually started (stalled load,
+  // silent autoplay block), force the reveal.
+  setTimeout(() => {
+    if (!hasRevealed && (video.paused || video.currentTime === 0)) reveal();
+  }, 4000);
+} else {
+  scheduleFallbackReveal();
+}
+
+// --- Mute toggle -----------------------------------------------------------
+
+if (muteToggle && video) {
+  muteToggle.addEventListener('click', () => {
+    video.muted = !video.muted;
+    const unmuted = !video.muted;
+    muteToggle.classList.toggle('unmuted', unmuted);
+    muteToggle.setAttribute('aria-pressed', String(unmuted));
+    muteToggle.setAttribute('aria-label', unmuted ? 'Выключить звук' : 'Включить звук');
+  });
+}
+
+// --- Mobile menu -----------------------------------------------------------
+
+if (burger && navbar) {
+  burger.addEventListener('click', () => {
+    const open = navbar.classList.toggle('nav-open');
+    burger.setAttribute('aria-expanded', String(open));
+  });
+}
+
+if (navLinks && navbar && burger) {
+  navLinks.addEventListener('click', (event) => {
+    if (event.target.closest('a')) {
+      navbar.classList.remove('nav-open');
+      burger.setAttribute('aria-expanded', 'false');
+    }
+  });
+}
+
+
+// --- Navbar solid state once scrolled past the hero ---------------------------
+(function () {
+  var nav = document.getElementById('navbar');
+  if (!nav) return;
+  var onScroll = function () {
+    nav.classList.toggle('scrolled', window.scrollY > window.innerHeight * 0.72);
+  };
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+})();
+
+// --- AI advisor bubbles: type the reply like it's being written ---------------
+(function () {
+  var demos = Array.prototype.slice.call(document.querySelectorAll('.ai-demo p'));
+  if (!demos.length) return;
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  demos.forEach(function (p) {
+    var full = p.textContent.replace(/\s+/g, ' ').trim();
+    var span = document.createElement('span');
+    span.className = 'ai-typewriter';
+    p.textContent = '';
+    p.appendChild(span);
+    if (reduce) { span.textContent = full; span.classList.add('done'); return; }
+    p._typeFull = full;
+    p._typeSpan = span;
+    p._typed = false;
+  });
+
+  var typeOut = function (p) {
+    if (p._typed) return;
+    p._typed = true;
+    var span = p._typeSpan, full = p._typeFull, i = 0;
+    var tick = function () {
+      // chunk 1–2 chars per frame-ish for a natural pace
+      i += 1;
+      span.textContent = full.slice(0, i);
+      if (i < full.length) {
+        setTimeout(tick, 22 + Math.random() * 34);
+      } else {
+        span.classList.add('done');
+      }
+    };
+    setTimeout(tick, 220);
+  };
+
+  if (reduce) return;
+  if ('IntersectionObserver' in window) {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) {
+        if (en.isIntersecting) {
+          typeOut(en.target._p);
+          io.unobserve(en.target);
+        }
+      });
+    }, { threshold: 0.6 });
+    demos.forEach(function (p) {
+      var host = p.closest('.ai-demo');
+      host._p = p;
+      io.observe(host);
+    });
+  } else {
+    demos.forEach(typeOut);
+  }
+})();
+
+// ===== Section interactions (recovered) =====
 // Flott — interactions: sticky header, mobile nav, scroll reveal
 
 (function () {
   var header = document.querySelector('.site-header');
 
   function onScroll() {
-    header.classList.toggle('scrolled', window.scrollY > 12);
+    if (header) header.classList.toggle('scrolled', window.scrollY > 12);
   }
   window.addEventListener('scroll', onScroll, { passive: true });
   onScroll();
 
   // Mobile nav
   var toggle = document.querySelector('.nav-toggle');
-  toggle.addEventListener('click', function () {
+  if (toggle) toggle.addEventListener('click', function () {
     var open = document.body.classList.toggle('nav-open');
     toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
   });
@@ -329,321 +482,171 @@
     }
   }
 
-  // Демо-дашборд: интерактив (переключение разделов, дропдауны, графики Chart.js)
-  var ddMain = document.getElementById('ddMain');
-  var ddNav = document.getElementById('ddNav');
-  if (ddMain && ddNav) {
-    var ddFmt = function (n) { return n.toLocaleString('ru-RU'); };
-    var ddCharts = [];
-
-    // 90 дней данных денежного потока
-    var ddCashFlow = (function () {
-      var data = [];
-      var today = new Date();
-      var bal = 1250;
-      for (var i = 0; i < 90; i += 5) {
-        var d = new Date(today); d.setDate(d.getDate() + i);
-        var inflow = Math.round(Math.random() * 300 + 200);
-        var outflow = Math.round(Math.random() * 350 + 150);
-        bal = bal + inflow - outflow;
-        data.push({ date: d.toLocaleDateString('ru-RU', { month: 'short', day: 'numeric' }), inflow: inflow, outflow: outflow, balance: Math.round(bal) });
-      }
-      return data;
-    })();
-
-    var ddInvoices = [
-      { id: 'INV-2036', customer: 'Business Solutions Inc', date: '28 дек 2024', amount: 145000000, status: 'pending', risk: 'low' },
-      { id: 'INV-2035', customer: 'Regional Retail Chain', date: '30 дек 2024', amount: 280000000, status: 'paid', risk: 'low' },
-      { id: 'INV-2034', customer: 'Global Trade Partners', date: '2 янв 2025', amount: 165000000, status: 'pending', risk: 'medium' },
-      { id: 'INV-2033', customer: 'Central Supplies Ltd', date: '5 янв 2025', amount: 92000000, status: 'overdue', risk: 'high' },
-      { id: 'INV-2032', customer: 'Eastern Distribution Co', date: '8 янв 2025', amount: 310000000, status: 'pending', risk: 'low' },
-      { id: 'INV-2031', customer: 'Northern Wholesale LLC', date: '10 янв 2025', amount: 198000000, status: 'paid', risk: 'low' },
-      { id: 'INV-2030', customer: 'Southern Trading Group', date: '12 янв 2025', amount: 135000000, status: 'pending', risk: 'medium' },
-      { id: 'INV-2029', customer: 'Western Imports Inc', date: '15 янв 2025', amount: 245000000, status: 'pending', risk: 'low' },
-      { id: 'INV-2028', customer: 'Pacific Distributors', date: '18 янв 2025', amount: 175000000, status: 'overdue', risk: 'high' },
-      { id: 'INV-2027', customer: 'Atlantic Commerce Ltd', date: '20 янв 2025', amount: 88000000, status: 'pending', risk: 'medium' }
-    ];
-
-    var ddStatusLabel = { paid: 'Оплачено', pending: 'Ожидает', overdue: 'Просрочено' };
-    var ddRiskLabel = { low: 'Низкий', medium: 'Средний', high: 'Высокий' };
-
-    var ddInvoiceRows = function () {
-      return ddInvoices.map(function (v) {
-        return '<tr>' +
-          '<td><span class="dd-inv-id">' + v.id + '</span></td>' +
-          '<td>' + v.customer + '</td>' +
-          '<td>' + v.date + '</td>' +
-          '<td class="dd-amt">' + ddFmt(v.amount) + '</td>' +
-          '<td><span class="dd-pill ' + v.status + '">' + ddStatusLabel[v.status] + '</span></td>' +
-          '<td><span class="dd-pill ' + v.risk + '">' + ddRiskLabel[v.risk] + '</span></td>' +
-          '</tr>';
-      }).join('');
-    };
-
-    var ddInvoiceTable = function () {
-      return '<div class="dd-table-wrap"><table class="dd-table"><thead><tr>' +
-        '<th>№ счета</th><th>Клиент/Поставщик</th><th>Срок оплаты</th><th>Сумма (UZS)</th><th>Статус</th><th>Риск</th>' +
-        '</tr></thead><tbody>' + ddInvoiceRows() + '</tbody></table></div>';
-    };
-
-    var ddLegend = function (withBal) {
-      return '<div class="dd-legend"><span class="leg"><span class="dd-dot in"></span>Поступления</span>' +
-        '<span class="leg"><span class="dd-dot out"></span>Выплаты</span>' +
-        (withBal ? '<span class="leg"><span class="dd-dot bal"></span>Баланс</span>' : '') + '</div>';
-    };
-
-    // рендер разделов → строка HTML
-    var ddSections = {
-      overview: function () {
-        return '<div class="dd-stack">' +
-          '<div class="dd-grid3">' +
-            '<div class="dd-card"><div class="dd-stat-label">Баланс на сегодня</div><div class="dd-stat-value">UZS 1,25B</div><div class="dd-stat-sub good"><i class="fas fa-arrow-up"></i>+12% к прошлому месяцу</div></div>' +
-            '<div class="dd-card"><div class="dd-stat-label">Счета к получению (следующие 7 дней)</div><div class="dd-stat-value sm">UZS 420M</div><div class="dd-stat-sub">12 счетов</div></div>' +
-            '<div class="dd-card"><div class="dd-stat-label">Счета к оплате (следующие 7 дней)</div><div class="dd-stat-value sm">UZS 385M</div><div class="dd-stat-sub warn"><i class="fas fa-exclamation-triangle"></i>8 счетов · Предупреждение о разрыве ликвидности</div></div>' +
-          '</div>' +
-          '<div class="dd-grid-chart">' +
-            '<div class="dd-card"><div class="dd-card-head"><h3 class="dd-card-title">Прогнозируемый денежный поток (следующие 90 дней)</h3>' + ddLegend(true) + '</div><div class="dd-chart-h"><canvas data-chart="overview"></canvas></div></div>' +
-            '<div class="dd-card"><div class="dd-card-head"><h3 class="dd-card-title">Задачи на сегодня от вашего агента денежного потока</h3></div><div class="dd-tasks">' +
-              '<div class="dd-task"><div class="dd-task-ic high"><i class="fas fa-phone"></i></div><div><div class="dd-task-title">Позвонить поставщику AsiaTrade, чтобы перенести срок на 5 дней</div><div class="dd-task-meta">Срок: UZS 125M · Счет #INV-2041</div></div></div>' +
-              '<div class="dd-task"><div class="dd-task-ic medium"><i class="fas fa-percentage"></i></div><div><div class="dd-task-title">Предложить скидку за раннюю оплату клиенту Alpha</div><div class="dd-task-meta">Ожидается: UZS 180M · Сэкономить 2% скидки</div></div></div>' +
-              '<div class="dd-task"><div class="dd-task-ic low"><i class="fas fa-hand-holding-usd"></i></div><div><div class="dd-task-title">Рассмотреть финансирование счета #INV-2043 (UZS 320M)</div><div class="dd-task-meta">Предварительно одобрено · Комиссия 1.5% · 30 дней</div></div></div>' +
-            '</div></div>' +
-          '</div>' +
-          '<div class="dd-card"><div class="dd-card-head"><h3 class="dd-card-title">Ключевые счета</h3><button class="dd-btn-ghost" type="button">Посмотреть все</button></div>' + ddInvoiceTable() + '</div>' +
-        '</div>';
+  // Кабинет клиента: переключение разделов
+  var cabMain = document.getElementById('cabMain');
+  var cabNav = document.getElementById('cabNav');
+  if (cabMain && cabNav) {
+    var CAB = {
+      overview: {
+        title: 'Обзор',
+        stats: [
+          { label: 'Баланс к выплате', value: 'UZS 840M', note: 'Ближайшая выплата — завтра' },
+          { label: 'Активные сделки', value: '7', note: '3 на подписании' },
+          { label: 'Риск-профиль', value: 'Низкий', note: 'Скоринг 82', tone: 'good' }
+        ],
+        listTitle: 'Последние события',
+        action: 'Новая заявка',
+        rows: [
+          { name: 'Выплата по сделке #2841', sub: 'Сегодня, 09:40', val: 'UZS 120M', tag: 'Зачислено', tone: 'good' },
+          { name: 'Заявка #2864 — подписание E-IMZO', sub: 'Ожидает вашей подписи', val: 'UZS 96M', tag: 'В процессе', tone: 'warn' },
+          { name: 'Счёт №1027 подтверждён покупателем', sub: 'Вчера, 18:02', val: 'UZS 96M', tag: 'Готов к финансированию', tone: 'good' },
+          { name: 'Обновлён лимит Turonbank', sub: 'Вчера', val: 'UZS 2.0B', tag: 'Лимит доступен', tone: 'good' }
+        ]
       },
-      cashFlow: function () {
-        return '<div class="dd-stack"><h2 class="dd-h2">Аналитика денежного потока</h2>' +
-          '<div class="dd-grid3">' +
-            '<div class="dd-card"><div class="dd-stat-label">Чистый денежный поток (90 дней)</div><div class="dd-stat-value">UZS 850M</div><div class="dd-stat-sub good"><i class="fas fa-arrow-up"></i>12% к предыдущему периоду</div></div>' +
-            '<div class="dd-card"><div class="dd-stat-label">Средний дневной приток</div><div class="dd-stat-value">UZS 258M</div><div class="dd-stat-sub">За 90 дней</div></div>' +
-            '<div class="dd-card"><div class="dd-stat-label">Средний дневной отток</div><div class="dd-stat-value">UZS 249M</div><div class="dd-stat-sub">За 90 дней</div></div>' +
-          '</div>' +
-          '<div class="dd-card"><div class="dd-card-head"><h3 class="dd-card-title">Прогноз денежного потока на 90 дней</h3>' + ddLegend(true) + '</div><div class="dd-chart-h tall"><canvas data-chart="cf90"></canvas></div></div>' +
-          '<div class="dd-card"><div class="dd-card-head"><h3 class="dd-card-title">Сравнение месячного денежного потока</h3>' + ddLegend(false) + '</div><div class="dd-chart-h mid"><canvas data-chart="cfMonthly"></canvas></div></div>' +
-        '</div>';
+      cashflow: {
+        title: 'Денежный поток',
+        stats: [
+          { label: 'Приток за 30 дней', value: 'UZS 1.9B', note: '+12% к прошлому месяцу', tone: 'good' },
+          { label: 'Отток за 30 дней', value: 'UZS 1.4B', note: 'Аренда, зарплаты, поставки' },
+          { label: 'Прогноз кассового разрыва', value: 'Нет', note: 'Горизонт — 90 дней', tone: 'good' }
+        ],
+        listTitle: 'Ближайшие поступления',
+        action: 'Экспорт отчёта',
+        rows: [
+          { name: 'Финансирование Turonbank', sub: 'Заявка #2864', val: 'UZS 96M', tag: 'Завтра', tone: 'good' },
+          { name: 'Оплата от Korzinka Retail', sub: 'По счёту №1024', val: 'UZS 310M', tag: '12 августа' },
+          { name: 'Оплата от Makro Supermarket', sub: 'По счёту №1019', val: 'UZS 180M', tag: '15 августа' },
+          { name: 'Оплата от Havas Group', sub: 'По счёту №1031', val: 'UZS 240M', tag: '21 августа' }
+        ]
       },
-      invoices: function () {
-        return '<div class="dd-stack"><h2 class="dd-h2">Управление счетами</h2>' +
-          '<div class="dd-card"><div class="dd-card-head"><h3 class="dd-card-title">Все счета</h3><button class="dd-btn-primary" type="button">Создать счет</button></div>' + ddInvoiceTable() + '</div></div>';
+      invoices: {
+        title: 'Счета-фактуры',
+        stats: [
+          { label: 'Всего счетов', value: '132', note: 'Из Налогового комитета — автоматически' },
+          { label: 'Ожидают оплаты', value: '15', note: 'UZS 1.2B' },
+          { label: 'Просрочено', value: '2', note: 'UZS 84M', tone: 'bad' }
+        ],
+        listTitle: 'Последние счета',
+        action: 'Выбрать для финансирования',
+        rows: [
+          { name: '№1034 · Korzinka Retail', sub: 'Выставлен сегодня', val: 'UZS 150M', tag: 'Новый' },
+          { name: '№1033 · Metro Supplies Ltd', sub: 'Выставлен вчера', val: 'UZS 88M', tag: 'Подтверждён', tone: 'good' },
+          { name: '№1031 · Havas Group', sub: '3 дня назад', val: 'UZS 240M', tag: 'Финансируется', tone: 'good' },
+          { name: '№1027 · AsiaTrade Wholesale', sub: 'Просрочен на 4 дня', val: 'UZS 46M', tag: 'Просрочен', tone: 'bad' }
+        ]
       },
-      suppliers: function () {
-        var list = [
-          { name: 'AsiaTrade Wholesale', amount: 'UZS 425M', invoices: 8, status: 'Хорошая репутация', tone: 'green' },
-          { name: 'Metro Supplies Ltd', amount: 'UZS 320M', invoices: 5, status: 'Хорошая репутация', tone: 'green' },
-          { name: 'TechParts Distribution', amount: 'UZS 215M', invoices: 4, status: 'На рассмотрении', tone: 'amber' },
-          { name: 'Global Imports Co', amount: 'UZS 180M', invoices: 6, status: 'Хорошая репутация', tone: 'green' },
-          { name: 'Regional Materials', amount: 'UZS 95M', invoices: 3, status: 'Хорошая репутация', tone: 'green' }
-        ].map(function (s) {
-          return '<div class="dd-row"><div><div class="dd-row-name">' + s.name + '</div><div class="dd-row-sub">' + s.invoices + ' активных счетов</div></div>' +
-            '<div class="dd-row-right"><div class="dd-row-val">' + s.amount + '</div><div class="dd-tone-' + s.tone + '" style="font-size:0.72rem">' + s.status + '</div></div></div>';
-        }).join('');
-        return '<div class="dd-stack"><h2 class="dd-h2">Управление поставщиками</h2>' +
-          '<div class="dd-grid3">' +
-            '<div class="dd-card"><div class="dd-stat-label">Всего поставщиков</div><div class="dd-stat-value">24</div><div class="dd-stat-sub">8 активных в этом месяце</div></div>' +
-            '<div class="dd-card"><div class="dd-stat-label">Неоплаченные счета</div><div class="dd-stat-value">UZS 1.2B</div><div class="dd-stat-sub">По 15 счетам</div></div>' +
-            '<div class="dd-card"><div class="dd-stat-label">Средние условия оплаты</div><div class="dd-stat-value">45 дней</div><div class="dd-stat-sub good">Улучшено на 5 дней</div></div>' +
-          '</div>' +
-          '<div class="dd-card"><div class="dd-card-head"><h3 class="dd-card-title">Топ поставщики</h3><button class="dd-btn-primary" type="button">Добавить поставщика</button></div><div class="dd-list">' + list + '</div></div></div>';
+      suppliers: {
+        title: 'Управление поставщиками',
+        stats: [
+          { label: 'Всего поставщиков', value: '24', note: '8 активных в этом месяце' },
+          { label: 'Неоплаченные счета', value: 'UZS 1.2B', note: 'По 15 счетам' },
+          { label: 'Средние условия оплаты', value: '45 дней', note: 'Улучшено на 5 дней', tone: 'good' }
+        ],
+        listTitle: 'Топ поставщики',
+        action: 'Добавить поставщика',
+        rows: [
+          { name: 'AsiaTrade Wholesale', sub: '8 активных счетов', val: 'UZS 425M', tag: 'Хорошая репутация', tone: 'good' },
+          { name: 'Metro Supplies Ltd', sub: '5 активных счетов', val: 'UZS 320M', tag: 'Хорошая репутация', tone: 'good' },
+          { name: 'TechParts Distribution', sub: '4 активных счёта', val: 'UZS 215M', tag: 'На рассмотрении', tone: 'warn' },
+          { name: 'Global Imports Co', sub: '6 активных счетов', val: 'UZS 180M', tag: 'Хорошая репутация', tone: 'good' },
+          { name: 'Regional Materials', sub: '3 активных счёта', val: 'UZS 95M', tag: 'Хорошая репутация', tone: 'good' }
+        ]
       },
-      customers: function () {
-        var list = [
-          { name: 'TechCorp Distribution', amount: 'UZS 820M', invoices: 12, credit: 'UZS 1.5B', score: 95 },
-          { name: 'Customer Alpha Ltd', amount: 'UZS 650M', invoices: 8, credit: 'UZS 1B', score: 88 },
-          { name: 'Regional Retail Chain', amount: 'UZS 420M', invoices: 10, credit: 'UZS 800M', score: 92 },
-          { name: 'Metro Trading LLC', amount: 'UZS 380M', invoices: 6, credit: 'UZS 600M', score: 78 },
-          { name: 'Business Solutions Inc', amount: 'UZS 285M', invoices: 5, credit: 'UZS 500M', score: 85 }
-        ].map(function (c) {
-          var tone = c.score >= 90 ? 'green' : c.score >= 80 ? 'blue' : 'amber';
-          return '<div class="dd-row"><div><div class="dd-row-name">' + c.name + '</div><div class="dd-row-sub">' + c.invoices + ' счетов · Кредитный лимит: ' + c.credit + '</div></div>' +
-            '<div class="dd-row-right"><div class="dd-row-val">' + c.amount + '</div><div class="dd-tone-' + tone + '" style="font-size:0.72rem">Оценка платежей: ' + c.score + '</div></div></div>';
-        }).join('');
-        return '<div class="dd-stack"><h2 class="dd-h2">Управление клиентами</h2>' +
-          '<div class="dd-grid3">' +
-            '<div class="dd-card"><div class="dd-stat-label">Всего клиентов</div><div class="dd-stat-value">42</div><div class="dd-stat-sub">12 новых в этом квартале</div></div>' +
-            '<div class="dd-card"><div class="dd-stat-label">Неоплаченная дебиторка</div><div class="dd-stat-value">UZS 2.8B</div><div class="dd-stat-sub">По 28 счетам</div></div>' +
-            '<div class="dd-card"><div class="dd-stat-label">Среднее время взыскания</div><div class="dd-stat-value">32 дней</div><div class="dd-stat-sub good"><i class="fas fa-arrow-up"></i>На 8% быстрее</div></div>' +
-          '</div>' +
-          '<div class="dd-card"><div class="dd-card-head"><h3 class="dd-card-title">Топ клиенты</h3><button class="dd-btn-primary" type="button">Добавить клиента</button></div><div class="dd-list">' + list + '</div></div></div>';
+      clients: {
+        title: 'Клиенты',
+        stats: [
+          { label: 'Всего клиентов', value: '18', note: '6 новых за квартал' },
+          { label: 'Дебиторская задолженность', value: 'UZS 2.1B', note: 'Средний срок — 38 дней' },
+          { label: 'Отсрочка платежа', value: '45 дней', note: 'Стандартные условия' }
+        ],
+        listTitle: 'Крупнейшие клиенты',
+        action: 'Добавить клиента',
+        rows: [
+          { name: 'Korzinka Retail', sub: '12 активных счетов', val: 'UZS 640M', tag: 'Платит вовремя', tone: 'good' },
+          { name: 'Makro Supermarket', sub: '9 активных счетов', val: 'UZS 480M', tag: 'Платит вовремя', tone: 'good' },
+          { name: 'Havas Group', sub: '7 активных счетов', val: 'UZS 410M', tag: 'Задержка 3 дня', tone: 'warn' },
+          { name: 'Uzum Market', sub: '4 активных счёта', val: 'UZS 260M', tag: 'Платит вовремя', tone: 'good' }
+        ]
       },
-      financing: function () {
-        var eligible = [
-          { id: 'INV-2043', customer: 'TechCorp Distribution', amount: 320000000, fee: '1.5%', term: '30 дней' },
-          { id: 'INV-2039', customer: 'Customer Alpha Ltd', amount: 180000000, fee: '1.6%', term: '45 дней' },
-          { id: 'INV-2037', customer: 'Metro Trading LLC', amount: 215000000, fee: '1.7%', term: '30 дней' },
-          { id: 'INV-2035', customer: 'Regional Retail Chain', amount: 145000000, fee: '1.5%', term: '30 дней' }
-        ].map(function (e) {
-          return '<div class="dd-row" style="cursor:default"><div><div style="display:flex;gap:12px;align-items:center;margin-bottom:8px"><span class="dd-mono">' + e.id + '</span><span class="dd-badge-green">Предварительно одобрено</span></div>' +
-            '<div class="dd-row-name">' + e.customer + '</div><div class="dd-row-sub">Комиссия: ' + e.fee + ' · Срок: ' + e.term + '</div></div>' +
-            '<div class="dd-row-right" style="display:flex;align-items:center;gap:16px"><div><div class="dd-row-val">' + ddFmt(e.amount) + ' UZS</div><div class="dd-row-sub">Доступно сейчас</div></div>' +
-            '<button class="dd-btn-primary" type="button">Финансировать сейчас</button></div></div>';
-        }).join('');
-        return '<div class="dd-stack"><h2 class="dd-h2">Финансирование счетов</h2>' +
-          '<div class="dd-grid3">' +
-            '<div class="dd-card"><div class="dd-stat-label">Доступная кредитная линия</div><div class="dd-stat-value">UZS 5B</div><div class="dd-stat-sub">Использовано UZS 2.3B</div></div>' +
-            '<div class="dd-card"><div class="dd-stat-label">Активное финансирование</div><div class="dd-stat-value">UZS 2.3B</div><div class="dd-stat-sub">12 счетов профинансировано</div></div>' +
-            '<div class="dd-card"><div class="dd-stat-label">Средняя ставка финансирования</div><div class="dd-stat-value">1.8%</div><div class="dd-stat-sub good">Лучше среднерыночной</div></div>' +
-          '</div>' +
-          '<div class="dd-card"><div class="dd-card-head"><h3 class="dd-card-title">Подходит для финансирования</h3><span class="dd-row-sub">Предварительно одобрено банками-партнерами</span></div><div class="dd-list">' + eligible + '</div></div>' +
-          '<div class="dd-benefit-card"><h3 class="dd-card-title" style="margin-bottom:16px">Почему финансирование с Flott?</h3><div class="dd-benefit-grid">' +
-            '<div class="dd-benefit"><div class="dd-benefit-ic b"><i class="fas fa-dollar-sign"></i></div><div><div class="dd-benefit-title">Мгновенные деньги</div><div class="dd-benefit-desc">Получите оплату в течение 24 часов</div></div></div>' +
-            '<div class="dd-benefit"><div class="dd-benefit-ic p"><i class="fas fa-chart-line"></i></div><div><div class="dd-benefit-title">Гибкие условия</div><div class="dd-benefit-desc">Выберите график погашения</div></div></div>' +
-            '<div class="dd-benefit"><div class="dd-benefit-ic g"><i class="fas fa-arrow-up"></i></div><div><div class="dd-benefit-title">Без залога</div><div class="dd-benefit-desc">Только финансирование под счет</div></div></div>' +
-          '</div></div>' +
-        '</div>';
+      financing: {
+        title: 'Финансирование',
+        stats: [
+          { label: 'Доступный лимит', value: 'UZS 2.0B', note: 'Turonbank · обновлён сегодня', tone: 'good' },
+          { label: 'Профинансировано', value: 'UZS 5.6B', note: 'С начала года' },
+          { label: 'Средняя ставка', value: '4,4%', note: '−0,3 п.п. за квартал', tone: 'good' }
+        ],
+        listTitle: 'Активные сделки',
+        action: 'Запросить финансирование',
+        rows: [
+          { name: 'Сделка #2841', sub: 'Выплата завтра', val: 'UZS 120M', tag: 'Подписана', tone: 'good' },
+          { name: 'Сделка #2864', sub: 'Ожидает E-IMZO', val: 'UZS 96M', tag: 'На подписании', tone: 'warn' },
+          { name: 'Сделка #2812', sub: 'Погашение 30 августа', val: 'UZS 210M', tag: 'Активна' },
+          { name: 'Сделка #2790', sub: 'Погашена 12 июля', val: 'UZS 145M', tag: 'Закрыта' }
+        ]
       },
-      settings: function () {
-        var banks = [
-          { name: 'Kapitalbank', account: '****1234', on: true },
-          { name: 'Ipoteka Bank', account: '****5678', on: true },
-          { name: 'NBU', account: '****9012', on: false }
-        ].map(function (b) {
-          return '<div class="dd-bank"><div class="dd-bank-left"><div class="dd-bank-ic"><i class="fas fa-dollar-sign"></i></div><div><div class="dd-row-name">' + b.name + '</div><div class="dd-row-sub">' + b.account + '</div></div></div>' +
-            '<div style="display:flex;align-items:center;gap:12px"><span class="dd-chip ' + (b.on ? 'on' : 'off') + '">' + (b.on ? 'Подключен' : 'Отключен') + '</span>' +
-            '<button class="dd-btn-primary" type="button">' + (b.on ? 'Управлять' : 'Подключить') + '</button></div></div>';
-        }).join('');
-        var notifs = [
-          { label: 'Email-уведомления о просроченных счетах', on: true },
-          { label: 'SMS-уведомления о полученных платежах', on: true },
-          { label: 'Предупреждения о прогнозе денежного потока', on: true },
-          { label: 'Еженедельная финансовая сводка', on: false },
-          { label: 'Маркетинговые письма', on: false }
-        ].map(function (n) {
-          return '<div class="dd-setting-row"><span style="color:#d1d5db">' + n.label + '</span><button class="dd-toggle ' + (n.on ? 'on' : '') + '" type="button"><span></span></button></div>';
-        }).join('');
-        return '<div class="dd-stack"><h2 class="dd-h2">Настройки</h2>' +
-          '<div class="dd-card"><h3 class="dd-card-title" style="margin-bottom:16px">Профиль компании</h3><div class="dd-form-grid">' +
-            '<div class="dd-field"><label>Название компании</label><input type="text" value="TechCorp Industries"></div>' +
-            '<div class="dd-field"><label>Налоговый ID</label><input type="text" value="123456789"></div>' +
-            '<div class="dd-field"><label>Email</label><input type="email" value="contact@techcorp.uz"></div>' +
-            '<div class="dd-field"><label>Телефон</label><input type="tel" value="+998 90 123 45 67"></div>' +
-            '<div class="dd-field full"><label>Адрес</label><input type="text" value="ул. Амира Темура 123, Ташкент, Узбекистан"></div>' +
-          '</div></div>' +
-          '<div class="dd-card"><h3 class="dd-card-title" style="margin-bottom:16px">Подключенные банки</h3><div class="dd-stack-sm">' + banks + '</div>' +
-            '<button class="dd-btn-soft" type="button" style="width:100%;margin-top:16px">+ Добавить новый банковский счет</button></div>' +
-          '<div class="dd-card"><h3 class="dd-card-title" style="margin-bottom:16px">Настройки уведомлений</h3><div class="dd-stack-sm">' + notifs + '</div></div>' +
-          '<div class="dd-card"><h3 class="dd-card-title" style="margin-bottom:16px">Безопасность</h3><div class="dd-stack-sm">' +
-            '<div class="dd-setting-row"><div><div class="dd-row-name">Двухфакторная аутентификация</div><div class="dd-row-sub">Дополнительный уровень безопасности</div></div><button class="dd-btn-green" type="button">Включено</button></div>' +
-            '<div class="dd-setting-row"><div><div class="dd-row-name">Изменить пароль</div><div class="dd-row-sub">Последнее изменение 45 дней назад</div></div><button class="dd-btn-primary" type="button">Обновить</button></div>' +
-            '<div class="dd-setting-row"><div><div class="dd-row-name">Активные сессии</div><div class="dd-row-sub">Управление активными сессиями</div></div><button class="dd-btn-soft" type="button">Просмотр</button></div>' +
-          '</div></div>' +
-          '<div class="dd-actions-end"><button class="dd-btn-soft" type="button">Отмена</button><button class="dd-btn-primary" type="button">Сохранить изменения</button></div>' +
-        '</div>';
+      settings: {
+        title: 'Настройки',
+        stats: null,
+        listTitle: 'Профиль компании',
+        action: 'Сохранить',
+        rows: [
+          { name: 'Компания', sub: '«Поставщик» MChJ · ИНН 305 481 220', val: '', tag: 'Проверена', tone: 'good' },
+          { name: 'Подпись E-IMZO', sub: 'Сертификат действует до 12.2026', val: '', tag: 'Активна', tone: 'good' },
+          { name: 'Уведомления', sub: 'Telegram и email', val: '', tag: 'Включены', tone: 'good' },
+          { name: 'Пользователи', sub: '4 участника команды', val: '', tag: 'Управление' }
+        ]
       }
     };
 
-    var ddLineOpts = function () {
-      return {
-        responsive: true, maintainAspectRatio: false,
-        plugins: {
-          legend: { display: false },
-          tooltip: {
-            mode: 'index', intersect: false,
-            backgroundColor: 'rgba(30, 41, 59, 0.95)', titleColor: '#fff', bodyColor: '#9ca3af',
-            borderColor: 'rgba(255,255,255,0.1)', borderWidth: 1, padding: 12,
-            callbacks: { label: function (c) { return (c.dataset.label || '') + ': UZS ' + Math.round(c.parsed.y) + 'M'; } }
-          }
-        },
-        scales: {
-          x: { grid: { display: false }, ticks: { color: '#6b7280', font: { size: 11 }, maxRotation: 0, autoSkip: true, maxTicksLimit: 8 } },
-          y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#6b7280', font: { size: 11 }, callback: function (v) { return v + 'M'; } } }
-        },
-        interaction: { mode: 'index', intersect: false }
-      };
+    var cabEsc = function (s) {
+      return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
     };
 
-    var ddArea = function (canvas, tall) {
-      var ctx = canvas.getContext('2d');
-      var mk = function (c) {
-        var g = ctx.createLinearGradient(0, 0, 0, tall ? 360 : 256);
-        g.addColorStop(0, c + '4d'); g.addColorStop(1, c + '00'); return g;
-      };
-      return new Chart(ctx, {
-        type: 'line',
-        data: {
-          labels: ddCashFlow.map(function (d) { return d.date; }),
-          datasets: [
-            { label: 'Поступления', data: ddCashFlow.map(function (d) { return d.inflow; }), borderColor: '#10b981', backgroundColor: mk('#10b981'), borderWidth: 2, fill: true, tension: 0.4, pointRadius: 0, pointHoverRadius: 4 },
-            { label: 'Выплаты', data: ddCashFlow.map(function (d) { return d.outflow; }), borderColor: '#ef4444', backgroundColor: mk('#ef4444'), borderWidth: 2, fill: true, tension: 0.4, pointRadius: 0, pointHoverRadius: 4 },
-            { label: 'Баланс', data: ddCashFlow.map(function (d) { return d.balance; }), borderColor: '#3b82f6', backgroundColor: mk('#3b82f6'), borderWidth: 3, fill: true, tension: 0.4, pointRadius: 0, pointHoverRadius: 5 }
-          ]
-        },
-        options: ddLineOpts()
+    var cabRender = function (key) {
+      var d = CAB[key];
+      if (!d) return;
+      var html = '<h3 class="cab-title">' + cabEsc(d.title) + '</h3>';
+      if (d.stats) {
+        html += '<div class="cab-stats">';
+        d.stats.forEach(function (s) {
+          html += '<div class="cab-stat">' +
+            '<div class="cab-stat-label">' + cabEsc(s.label) + '</div>' +
+            '<div class="cab-stat-value">' + cabEsc(s.value) + '</div>' +
+            '<div class="cab-stat-note' + (s.tone ? ' tone-' + s.tone : '') + '">' + cabEsc(s.note) + '</div>' +
+            '</div>';
+        });
+        html += '</div>';
+      }
+      html += '<div class="cab-list"><div class="cab-list-head">' +
+        '<span class="cab-list-title">' + cabEsc(d.listTitle) + '</span>' +
+        '<button class="cab-action" type="button">' + cabEsc(d.action) + '</button></div>' +
+        '<div class="cab-rows">';
+      d.rows.forEach(function (r) {
+        html += '<div class="cab-row"><div class="cab-row-left">' +
+          '<div class="cab-row-name">' + cabEsc(r.name) + '</div>' +
+          '<div class="cab-row-sub">' + cabEsc(r.sub) + '</div></div>' +
+          '<div class="cab-row-right">' +
+          (r.val ? '<div class="cab-row-val">' + cabEsc(r.val) + '</div>' : '') +
+          '<div class="cab-row-tag' + (r.tone ? ' tone-' + r.tone : '') + '">' + cabEsc(r.tag) + '</div>' +
+          '</div></div>';
       });
+      html += '</div></div>';
+      cabMain.innerHTML = html;
+      cabMain.classList.remove('cab-anim');
+      void cabMain.offsetWidth;
+      cabMain.classList.add('cab-anim');
     };
 
-    var ddBars = function (canvas) {
-      var ctx = canvas.getContext('2d');
-      var months = [
-        { month: 'Авг', inflows: 6800, outflows: 6200 }, { month: 'Сен', inflows: 7200, outflows: 6800 },
-        { month: 'Окт', inflows: 7800, outflows: 7100 }, { month: 'Ноя', inflows: 8200, outflows: 7600 },
-        { month: 'Дек', inflows: 8600, outflows: 7900 }, { month: 'Янв', inflows: 9100, outflows: 8300 }
-      ];
-      return new Chart(ctx, {
-        type: 'bar',
-        data: {
-          labels: months.map(function (m) { return m.month; }),
-          datasets: [
-            { label: 'Поступления', data: months.map(function (m) { return m.inflows; }), backgroundColor: '#10b981', borderRadius: 8 },
-            { label: 'Выплаты', data: months.map(function (m) { return m.outflows; }), backgroundColor: '#ef4444', borderRadius: 8 }
-          ]
-        },
-        options: ddLineOpts()
-      });
-    };
-
-    var ddBuildCharts = function () {
-      Array.prototype.forEach.call(ddMain.querySelectorAll('canvas[data-chart]'), function (cv) {
-        var kind = cv.getAttribute('data-chart');
-        if (typeof Chart === 'undefined') return;
-        if (kind === 'overview') ddCharts.push(ddArea(cv, false));
-        else if (kind === 'cf90') ddCharts.push(ddArea(cv, true));
-        else if (kind === 'cfMonthly') ddCharts.push(ddBars(cv));
-      });
-    };
-
-    var ddRender = function (key) {
-      ddCharts.forEach(function (c) { try { c.destroy(); } catch (e) {} });
-      ddCharts = [];
-      ddMain.innerHTML = (ddSections[key] || ddSections.overview)();
-      ddBuildCharts();
-      Array.prototype.forEach.call(ddMain.querySelectorAll('.dd-toggle'), function (t) {
-        t.addEventListener('click', function () { t.classList.toggle('on'); });
-      });
-    };
-
-    ddNav.addEventListener('click', function (e) {
-      var btn = e.target.closest('.dd-tab');
+    cabNav.addEventListener('click', function (e) {
+      var btn = e.target.closest('.cab-tab');
       if (!btn) return;
-      Array.prototype.forEach.call(ddNav.querySelectorAll('.dd-tab'), function (t) { t.classList.toggle('active', t === btn); });
-      ddRender(btn.getAttribute('data-section'));
+      Array.prototype.forEach.call(cabNav.querySelectorAll('.cab-tab'), function (t) {
+        t.classList.toggle('active', t === btn);
+      });
+      cabRender(btn.getAttribute('data-tab'));
     });
 
-    // Дропдауны (уведомления + пользователь)
-    var ddBellBtn = document.getElementById('ddBellBtn');
-    var ddNotifMenu = document.getElementById('ddNotifMenu');
-    var ddUserBtn = document.getElementById('ddUserBtn');
-    var ddUserMenu = document.getElementById('ddUserMenu');
-    var ddCloseMenus = function () {
-      if (ddNotifMenu) ddNotifMenu.hidden = true;
-      if (ddUserMenu) ddUserMenu.hidden = true;
-    };
-    if (ddBellBtn) ddBellBtn.addEventListener('click', function (e) {
-      e.stopPropagation();
-      var open = ddNotifMenu.hidden;
-      ddCloseMenus();
-      ddNotifMenu.hidden = !open;
-    });
-    if (ddUserBtn) ddUserBtn.addEventListener('click', function (e) {
-      e.stopPropagation();
-      var open = ddUserMenu.hidden;
-      ddCloseMenus();
-      ddUserMenu.hidden = !open;
-    });
-    [ddNotifMenu, ddUserMenu].forEach(function (m) { if (m) m.addEventListener('click', function (e) { e.stopPropagation(); }); });
-    document.addEventListener('click', ddCloseMenus);
-
-    ddRender('overview');
+    cabRender('suppliers');
   }
 
   // Веер заявок в блоке банка: клик поднимает карту, скролл — параллакс
@@ -935,38 +938,6 @@
       window.addEventListener('resize', reqAiParallax);
       aiParallax();
     }
-  }
-
-  // Сейф в hero: два клипа. «Работаю с Flott» — открытие, «Без Flott» — закрытие.
-  var safeScene = document.getElementById('safeScene');
-  if (safeScene) {
-    var safeOpenVid = document.getElementById('safeOpen');
-    var safeCloseVid = document.getElementById('safeClose');
-    var btnWithFlott = document.getElementById('btnWithFlott');
-    var btnWithoutFlott = document.getElementById('btnWithoutFlott');
-    var safeNote = document.getElementById('safeNote');
-
-    var safeSetState = function (open) {
-      btnWithFlott.classList.toggle('active', open);
-      btnWithoutFlott.classList.toggle('active', !open);
-      if (safeNote) {
-        safeNote.textContent = open
-          ? 'С Flott счета превращаются в деньги за часы — сейф открыт.'
-          : 'Без Flott деньги неделями заперты в дебиторке.';
-      }
-    };
-
-    // проигрываем нужный клип, второй прячем; последний кадр остаётся на экране
-    var safePlay = function (vid, other) {
-      other.classList.remove('on');
-      try { vid.currentTime = 0; } catch (e) {}
-      vid.classList.add('on');
-      var p = vid.play();
-      if (p && p.catch) p.catch(function () {});
-    };
-
-    btnWithFlott.addEventListener('click', function () { safeSetState(true); safePlay(safeOpenVid, safeCloseVid); });
-    btnWithoutFlott.addEventListener('click', function () { safeSetState(false); safePlay(safeCloseVid, safeOpenVid); });
   }
 
   // Reveal on scroll
