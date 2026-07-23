@@ -724,7 +724,7 @@ h3 {
   display: flex;
   align-items: center;
   justify-content: center;
-  animation: aiDimIn 0.32s var(--ease);
+  animation: aiDimIn 1.1s var(--ease);
 }
 
 .ai-modal {
@@ -737,57 +737,6 @@ h3 {
   overflow: hidden;
   box-shadow: 0 40px 100px -20px rgba(10, 15, 40, 0.5);
   will-change: transform, opacity;
-}
-
-/* Two-phase open: the white box grows from the clicked bubble first, then the
-   chat chrome fades in — so the non-uniform scale is never seen on text. */
-.ai-modal > .ai-dialog-head,
-.ai-modal > .ai-dialog-body,
-.ai-modal > .ai-dialog-foot {
-  transition: opacity 0.22s var(--ease), transform 0.22s var(--ease);
-}
-
-.ai-modal.ai-opening > .ai-dialog-head,
-.ai-modal.ai-opening > .ai-dialog-body,
-.ai-modal.ai-opening > .ai-dialog-foot {
-  opacity: 0;
-  transform: translateY(6px);
-  transition: none; /* hide instantly at Phase A; only the reveal (below) animates */
-}
-
-/* Content fades out on close, just before the box shrinks back into the bubble */
-.ai-modal.ai-closing > .ai-dialog-head,
-.ai-modal.ai-closing > .ai-dialog-body,
-.ai-modal.ai-closing > .ai-dialog-foot {
-  opacity: 0;
-  transform: translateY(4px);
-  transition-duration: 0.14s;
-}
-
-/* The header avatar hides while the flying clone is in transit, then the clone
-   lands exactly on its spot and hands off — a seamless swap. */
-.ai-modal.ai-flying .ai-dialog-head .ai-avatar {
-  opacity: 0;
-}
-
-/* Telegram-style avatar clone that flies between the bubble and the header */
-.ai-fly-avatar {
-  position: fixed;
-  z-index: 5;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--blue);
-  color: var(--white);
-  font-weight: 700;
-  font-size: 0.66rem;
-  letter-spacing: 0.04em;
-  pointer-events: none;
-  will-change: transform, border-radius;
-}
-
-.ai-fly-avatar[hidden] {
-  display: none;
 }
 
 .ai-dialog-head {
