@@ -1124,3 +1124,54 @@ if (navLinks && navbar && burger) {
     revealed.forEach(function (el) { el.classList.add('in'); });
   }
 })();
+
+// --- Cursor-reactive 3D tilt on the feature cards (fine pointer only) ---------
+(function () {
+  var finePointer = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+  var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (!finePointer || reduceMotion) return;
+
+  var MAX = 6; // degrees
+  var setTilt = function (el, ev) {
+    var r = el.getBoundingClientRect();
+    var px = (ev.clientX - r.left) / r.width - 0.5;
+    var py = (ev.clientY - r.top) / r.height - 0.5;
+    el.style.setProperty('--ty', (px * MAX).toFixed(2) + 'deg');
+    el.style.setProperty('--tx', (-py * MAX).toFixed(2) + 'deg');
+  };
+  var clearTilt = function (el) {
+    el.style.setProperty('--ty', '0deg');
+    el.style.setProperty('--tx', '0deg');
+  };
+
+  // Single-panel cards (02 · client, 03 · underwriter)
+  Array.prototype.forEach.call(document.querySelectorAll('.panel-tilt'), function (panel) {
+    panel.addEventListener('pointermove', function (ev) { setTilt(panel, ev); });
+    panel.addEventListener('pointerleave', function () { clearTilt(panel); });
+  });
+
+  // Bank deck (01) — tilt whichever card is currently on top; the swap stays intact
+  var deck = document.getElementById('bankDeck');
+  if (deck) {
+    deck.addEventListener('pointermove', function (ev) {
+      var front = deck.querySelector('.slot-front');
+      if (front) setTilt(front, ev);
+    });
+    deck.addEventListener('pointerleave', function () {
+      // clear both so a stale tilt never sticks after a swap
+      Array.prototype.forEach.call(deck.querySelectorAll('.deck-cards .panel'), clearTilt);
+    });
+  }
+
+  // Magnetic buttons — the element is pulled toward the cursor
+  var MAG = 0.28;
+  Array.prototype.forEach.call(document.querySelectorAll('.magnetic'), function (btn) {
+    btn.addEventListener('pointermove', function (ev) {
+      var r = btn.getBoundingClientRect();
+      var mx = ev.clientX - (r.left + r.width / 2);
+      var my = ev.clientY - (r.top + r.height / 2);
+      btn.style.transform = 'translate(' + (mx * MAG).toFixed(1) + 'px, ' + (my * MAG).toFixed(1) + 'px)';
+    });
+    btn.addEventListener('pointerleave', function () { btn.style.transform = ''; });
+  });
+})();

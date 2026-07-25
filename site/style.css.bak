@@ -130,6 +130,13 @@ h3 {
 .btn:hover { transform: translateY(-2px); }
 .btn:active { transform: translateY(0); }
 
+/* Magnetic button — JS translates it toward the cursor; keep the transform
+   snappy (the default 0.35s feels floaty) while preserving colour transitions. */
+.magnetic {
+  transition: transform 0.18s var(--ease), background 0.35s var(--ease),
+    color 0.35s var(--ease), border-color 0.35s var(--ease);
+}
+
 .btn-sm { padding: 12px 22px; font-size: 0.92rem; }
 
 .btn-primary { background: var(--blue); color: var(--blue-text-on); }
@@ -724,7 +731,7 @@ h3 {
   display: flex;
   align-items: center;
   justify-content: center;
-  animation: aiDimIn 1.1s var(--ease);
+  animation: aiDimIn 0.32s var(--ease);
 }
 
 .ai-modal {
@@ -737,6 +744,57 @@ h3 {
   overflow: hidden;
   box-shadow: 0 40px 100px -20px rgba(10, 15, 40, 0.5);
   will-change: transform, opacity;
+}
+
+/* Two-phase open: the white box grows from the clicked bubble first, then the
+   chat chrome fades in — so the non-uniform scale is never seen on text. */
+.ai-modal > .ai-dialog-head,
+.ai-modal > .ai-dialog-body,
+.ai-modal > .ai-dialog-foot {
+  transition: opacity 0.22s var(--ease), transform 0.22s var(--ease);
+}
+
+.ai-modal.ai-opening > .ai-dialog-head,
+.ai-modal.ai-opening > .ai-dialog-body,
+.ai-modal.ai-opening > .ai-dialog-foot {
+  opacity: 0;
+  transform: translateY(6px);
+  transition: none; /* hide instantly at Phase A; only the reveal (below) animates */
+}
+
+/* Content fades out on close, just before the box shrinks back into the bubble */
+.ai-modal.ai-closing > .ai-dialog-head,
+.ai-modal.ai-closing > .ai-dialog-body,
+.ai-modal.ai-closing > .ai-dialog-foot {
+  opacity: 0;
+  transform: translateY(4px);
+  transition-duration: 0.14s;
+}
+
+/* The header avatar hides while the flying clone is in transit, then the clone
+   lands exactly on its spot and hands off — a seamless swap. */
+.ai-modal.ai-flying .ai-dialog-head .ai-avatar {
+  opacity: 0;
+}
+
+/* Telegram-style avatar clone that flies between the bubble and the header */
+.ai-fly-avatar {
+  position: fixed;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--blue);
+  color: var(--white);
+  font-weight: 700;
+  font-size: 0.66rem;
+  letter-spacing: 0.04em;
+  pointer-events: none;
+  will-change: transform, border-radius;
+}
+
+.ai-fly-avatar[hidden] {
+  display: none;
 }
 
 .ai-dialog-head {
@@ -1490,6 +1548,13 @@ h3 {
     0 30px 70px -28px rgba(18, 48, 158, 0.30);
 }
 
+/* Cursor-reactive 3D tilt — driven by --tx/--ty from script.js (fine pointer only) */
+.panel-tilt {
+  transform: perspective(900px) rotateX(var(--tx, 0deg)) rotateY(var(--ty, 0deg));
+  transition: transform 500ms var(--ease);
+  will-change: transform;
+}
+
 .panel-head {
   display: flex;
   align-items: center;
@@ -1552,10 +1617,12 @@ h3 {
   pointer-events: auto;
 }
 
-.slot-front { transform: translateX(-6%) rotate(-10deg) scale(0.88); cursor: default; }
+/* perspective() must lead the list, or the 3D tilt collapses to a flat 2D matrix */
+.slot-front { transform: perspective(900px) rotateX(var(--tx, 0deg)) rotateY(var(--ty, 0deg)) translateX(-6%) rotate(-10deg) scale(0.88); cursor: default; }
 .slot-back { transform: translateX(6%) translateY(56px) rotate(10deg) scale(0.88); cursor: pointer; }
 
-.panel-deck:hover .slot-front { transform: translateX(-10%) rotate(-16deg) scale(0.88); }
+/* Front card keeps its fan on hover and also picks up the cursor tilt (--tx/--ty) */
+.panel-deck:hover .slot-front { transform: perspective(900px) rotateX(var(--tx, 0deg)) rotateY(var(--ty, 0deg)) translateX(-10%) rotate(-16deg) scale(0.88); }
 .panel-deck:hover .slot-back { transform: translateX(10%) translateY(56px) rotate(16deg) scale(0.88); }
 
 .progress-steps {

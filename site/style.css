@@ -24,7 +24,10 @@
   --r-md: 20px;
   --r-sm: 14px;
 
-  --font: "Golos Text", -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font: "Inter", -apple-system, "Segoe UI", Roboto, sans-serif;
+  /* Voltaire is a display face and ships a single weight (400) — headings use
+     it at 400 to avoid faux-bold. */
+  --font-head: "Voltaire", "Golos Text", var(--font);
   --ease: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
@@ -82,6 +85,13 @@ h3 {
   letter-spacing: -0.015em;
 }
 
+/* Voltaire display headings — single weight, so pin to 400 and disable synthesis */
+h1, h2, h3, .h2-sm {
+  font-family: var(--font-head);
+  font-weight: 400;
+  font-synthesis-weight: none;
+}
+
 .eyebrow {
   display: inline-block;
   font-size: 0.8rem;
@@ -129,6 +139,13 @@ h3 {
 
 .btn:hover { transform: translateY(-2px); }
 .btn:active { transform: translateY(0); }
+
+/* Magnetic button — JS translates it toward the cursor; keep the transform
+   snappy (the default 0.35s feels floaty) while preserving colour transitions. */
+.magnetic {
+  transition: transform 0.18s var(--ease), background 0.35s var(--ease),
+    color 0.35s var(--ease), border-color 0.35s var(--ease);
+}
 
 .btn-sm { padding: 12px 22px; font-size: 0.92rem; }
 
@@ -1541,6 +1558,13 @@ h3 {
     0 30px 70px -28px rgba(18, 48, 158, 0.30);
 }
 
+/* Cursor-reactive 3D tilt — driven by --tx/--ty from script.js (fine pointer only) */
+.panel-tilt {
+  transform: perspective(900px) rotateX(var(--tx, 0deg)) rotateY(var(--ty, 0deg));
+  transition: transform 500ms var(--ease);
+  will-change: transform;
+}
+
 .panel-head {
   display: flex;
   align-items: center;
@@ -1603,10 +1627,12 @@ h3 {
   pointer-events: auto;
 }
 
-.slot-front { transform: translateX(-6%) rotate(-10deg) scale(0.88); cursor: default; }
+/* perspective() must lead the list, or the 3D tilt collapses to a flat 2D matrix */
+.slot-front { transform: perspective(900px) rotateX(var(--tx, 0deg)) rotateY(var(--ty, 0deg)) translateX(-6%) rotate(-10deg) scale(0.88); cursor: default; }
 .slot-back { transform: translateX(6%) translateY(56px) rotate(10deg) scale(0.88); cursor: pointer; }
 
-.panel-deck:hover .slot-front { transform: translateX(-10%) rotate(-16deg) scale(0.88); }
+/* Front card keeps its fan on hover and also picks up the cursor tilt (--tx/--ty) */
+.panel-deck:hover .slot-front { transform: perspective(900px) rotateX(var(--tx, 0deg)) rotateY(var(--ty, 0deg)) translateX(-10%) rotate(-16deg) scale(0.88); }
 .panel-deck:hover .slot-back { transform: translateX(10%) translateY(56px) rotate(16deg) scale(0.88); }
 
 .progress-steps {
@@ -2428,7 +2454,7 @@ h3 {
 
 .headline {
   color: #fff;
-  font-weight: 800;
+  font-weight: 400; /* Voltaire ships a single weight */
   font-size: clamp(40px, 5vw, 64px);
   line-height: 1.05;
   letter-spacing: -0.01em;

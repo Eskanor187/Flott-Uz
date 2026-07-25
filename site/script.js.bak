@@ -713,6 +713,8 @@ if (navLinks && navbar && burger) {
     var aiChatRole = document.getElementById('aiChatRole');
     var aiReduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     var aiTimers = [];
+    var aiOpener = null;    // the bubble we grew from — hidden while open, restored on close
+    var aiOpenTimer = null; // Phase B (content reveal) timer
 
     var AI_CHATS = {
       client: {
@@ -795,6 +797,62 @@ if (navLinks && navbar && burger) {
     };
 
     var aiModal = aiDialog.querySelector('.ai-modal');
+    var aiSrcRect = null;   // bubble rect the modal grew from — used to shrink back
+    var aiFlyer = null;     // reused clone that flies between bubble and header
+    var aiFlyTimer = null;
+
+    // Look of the AI avatar at each end of its flight
+    var AI_AV_BUBBLE = { radius: '50%', shadow: '0 12px 26px -8px rgba(18, 48, 158, 0.5)' };
+    var AI_AV_HEADER = { radius: '10px', shadow: 'none' };
+
+    var aiGetFlyer = function () {
+      if (!aiFlyer) {
+        aiFlyer = document.createElement('div');
+        aiFlyer.className = 'ai-fly-avatar';
+        aiFlyer.textContent = 'AI';
+        aiFlyer.hidden = true;
+        aiDialog.appendChild(aiFlyer);
+      }
+      return aiFlyer;
+    };
+
+    // FLIP a small avatar clone from startRect → endRect, morphing radius + shadow.
+    var aiFlyAvatar = function (startRect, endRect, startStyle, endStyle, dur) {
+      if (!startRect || !endRect) return;
+      var f = aiGetFlyer();
+      if (aiFlyTimer) { clearTimeout(aiFlyTimer); aiFlyTimer = null; }
+      aiModal.classList.add('ai-flying');
+      f.hidden = false;
+      f.style.transition = 'none';
+      f.style.left = endRect.left + 'px';
+      f.style.top = endRect.top + 'px';
+      f.style.width = endRect.width + 'px';
+      f.style.height = endRect.height + 'px';
+      f.style.transformOrigin = '0 0';
+      var s = startRect.width / endRect.width;
+      f.style.transform =
+        'translate(' + (startRect.left - endRect.left) + 'px,' +
+        (startRect.top - endRect.top) + 'px) scale(' + s.toFixed(4) + ')';
+      f.style.borderRadius = startStyle.radius;
+      f.style.boxShadow = startStyle.shadow;
+      void f.offsetWidth;
+      f.style.transition =
+        'transform ' + dur + 'ms cubic-bezier(0.16, 1, 0.3, 1), ' +
+        'border-radius ' + dur + 'ms cubic-bezier(0.16, 1, 0.3, 1), ' +
+        'box-shadow ' + dur + 'ms ease';
+      f.style.transform = 'none';
+      f.style.borderRadius = endStyle.radius;
+      f.style.boxShadow = endStyle.shadow;
+      aiFlyTimer = setTimeout(function () {
+        aiFlyTimer = null;
+        f.hidden = true;
+        aiModal.classList.remove('ai-flying');
+      }, dur + 40);
+    };
+
+    var aiAvRect = function (el) {
+      return el ? el.getBoundingClientRect() : null;
+    };
 
     var openAiChat = function (kind, openerEl) {
       var chat = AI_CHATS[kind];
@@ -803,23 +861,42 @@ if (navLinks && navbar && burger) {
       aiChatRole.textContent = chat.role;
       aiChatBody.innerHTML = '';
       var srcRect = openerEl ? openerEl.getBoundingClientRect() : null;
+      aiModal.classList.remove('ai-opening');
+      if (aiOpenTimer) { clearTimeout(aiOpenTimer); aiOpenTimer = null; }
       aiDialog.showModal();
-      // пузырь плавно вырастает в окно чата (FLIP)
+      // Пузырь вырастает в окно чата (FLIP), в две фазы:
+      // A — сплошная белая карточка растёт из пузыря (контент скрыт, чтобы
+      //     неравномерный масштаб не искажал текст);
+      // B — когда карточка почти на месте, проявляется содержимое чата.
       if (srcRect && !aiReduce) {
         var target = aiModal.getBoundingClientRect();
         var sx = srcRect.width / target.width;
         var sy = srcRect.height / target.height;
+        // Measure both avatar endpoints while the header is still at its natural
+        // spot (before ai-opening nudges it or the modal transform is applied).
+        var srcAvRect = aiAvRect(openerEl && openerEl.querySelector('.ai-avatar'));
+        var headAvRect = aiAvRect(aiDialog.querySelector('.ai-dialog-head .ai-avatar'));
+
+        aiModal.classList.add('ai-opening');
+        aiOpener = openerEl;
+        aiSrcRect = srcRect;
+        if (openerEl) openerEl.style.opacity = '0'; // one shared surface, not two
         aiModal.style.transition = 'none';
         aiModal.style.transformOrigin = '0 0';
+        aiModal.style.opacity = '1';
         aiModal.style.transform =
           'translate(' + (srcRect.left - target.left) + 'px,' +
           (srcRect.top - target.top) + 'px) scale(' + sx.toFixed(4) + ',' + sy.toFixed(4) + ')';
-        aiModal.style.opacity = '0.35';
         void aiModal.offsetWidth;
-        aiModal.style.transition =
-          'transform 1.5s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.9s ease';
+        aiModal.style.transition = 'transform 0.38s cubic-bezier(0.16, 1, 0.3, 1)';
         aiModal.style.transform = 'none';
-        aiModal.style.opacity = '1';
+        // The AI avatar flies from the bubble into the header (Telegram-style)
+        aiFlyAvatar(srcAvRect, headAvRect, AI_AV_BUBBLE, AI_AV_HEADER, 400);
+        // Phase B — reveal the chat chrome once the box is most of the way there
+        aiOpenTimer = setTimeout(function () {
+          aiModal.classList.remove('ai-opening');
+          aiOpenTimer = null;
+        }, 250);
       }
       if (aiReduce) {
         chat.msgs.forEach(function (m) { aiChatBody.appendChild(aiMsgEl(m)); });
@@ -887,34 +964,84 @@ if (navLinks && navbar && burger) {
     });
     aiSend.addEventListener('click', aiSendMsg);
 
-    // Quick shrink-and-fade on the way out — far shorter than the showy
-    // FLIP entrance; exits should snap, not linger.
+    // Reverse of the open: content fades out, the avatar flies home, and the
+    // box shrinks back into the bubble (rather than just vanishing).
     var aiAnimatedClose = function () {
-      if (aiReduce) { aiDialog.close(); return; }
+      if (aiOpenTimer) { clearTimeout(aiOpenTimer); aiOpenTimer = null; }
+      aiModal.classList.remove('ai-opening');
+
+      // Reduced motion (or nothing to shrink into): close instantly, tidy up.
+      if (aiReduce) {
+        if (aiFlyer) aiFlyer.hidden = true;
+        aiModal.classList.remove('ai-flying');
+        if (aiOpener) { aiOpener.style.opacity = ''; aiOpener = null; }
+        aiDialog.close();
+        return;
+      }
       if (aiModal.getAttribute('data-closing')) return;
       aiModal.setAttribute('data-closing', '1');
-      aiModal.style.transformOrigin = '50% 50%';
-      aiModal.style.transition =
-        'transform 0.18s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.18s ease';
-      void aiModal.offsetWidth;
-      aiModal.style.transform = 'scale(0.97)';
-      aiModal.style.opacity = '0';
+
+      // 1 — fade the chat chrome out
+      aiModal.classList.add('ai-closing');
+      // 2 — fade the dim backdrop out alongside
+      aiDialog.style.transition = 'background 0.3s ease';
+      aiDialog.style.background = 'rgba(10, 11, 16, 0)';
+      // 3 — avatar flies back from the header into the bubble
+      if (aiOpener) {
+        aiFlyAvatar(
+          aiAvRect(aiDialog.querySelector('.ai-dialog-head .ai-avatar')),
+          aiAvRect(aiOpener.querySelector('.ai-avatar')),
+          AI_AV_HEADER, AI_AV_BUBBLE, 340
+        );
+      }
+
+      // 4 — shrink the box back into the bubble rect (reverse FLIP)
+      var useShrink = !!aiSrcRect;
+      if (useShrink) {
+        var target = aiModal.getBoundingClientRect();
+        var sx = aiSrcRect.width / target.width;
+        var sy = aiSrcRect.height / target.height;
+        aiModal.style.transformOrigin = '0 0';
+        aiModal.style.transition = 'transform 0.34s cubic-bezier(0.16, 1, 0.3, 1)';
+        void aiModal.offsetWidth;
+        aiModal.style.transform =
+          'translate(' + (aiSrcRect.left - target.left) + 'px,' +
+          (aiSrcRect.top - target.top) + 'px) scale(' + sx.toFixed(4) + ',' + sy.toFixed(4) + ')';
+      } else {
+        aiModal.style.transformOrigin = '50% 50%';
+        aiModal.style.transition =
+          'transform 0.18s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.18s ease';
+        void aiModal.offsetWidth;
+        aiModal.style.transform = 'scale(0.97)';
+        aiModal.style.opacity = '0';
+      }
+
       var closed = false;
-      var finish = function () {
+      var finish = function (e) {
+        // Ignore transitionend bubbling up from the content children — wait for
+        // the modal's own transform to finish (or the fallback timer).
+        if (e && (e.target !== aiModal || e.propertyName !== 'transform')) return;
         if (closed) return;
         closed = true;
         aiModal.removeEventListener('transitionend', finish);
-        // Clean up here rather than in the 'close' event — that event is not
-        // guaranteed to fire, and a leaked data-closing would block reopening.
+        if (aiFlyTimer) { clearTimeout(aiFlyTimer); aiFlyTimer = null; }
+        if (aiFlyer) aiFlyer.hidden = true;
+        aiModal.classList.remove('ai-flying', 'ai-closing');
         aiModal.removeAttribute('data-closing');
         aiModal.style.transition = '';
         aiModal.style.transform = '';
         aiModal.style.transformOrigin = '';
         aiModal.style.opacity = '';
+        // Reset the dim here too — the 'close' event is not guaranteed to fire,
+        // and a leaked transparent background would kill the dim on reopen.
+        aiDialog.style.transition = '';
+        aiDialog.style.background = '';
+        // Restore the bubble at the very end so the box→bubble swap is seamless.
+        if (aiOpener) { aiOpener.style.opacity = ''; aiOpener = null; }
         aiDialog.close();
       };
       aiModal.addEventListener('transitionend', finish);
-      setTimeout(finish, 260);
+      setTimeout(finish, useShrink ? 380 : 260);
     };
 
     document.getElementById('aiChatClose').addEventListener('click', aiAnimatedClose);
@@ -928,11 +1055,15 @@ if (navLinks && navbar && burger) {
     });
     aiDialog.addEventListener('close', function () {
       aiClearTimers();
+      aiModal.classList.remove('ai-flying', 'ai-closing', 'ai-opening');
       aiModal.removeAttribute('data-closing');
       aiModal.style.transition = '';
       aiModal.style.transform = '';
       aiModal.style.transformOrigin = '';
       aiModal.style.opacity = '';
+      aiDialog.style.transition = '';
+      aiDialog.style.background = '';
+      if (aiFlyer) aiFlyer.hidden = true;
       aiInput.value = '';
       aiSyncSend();
     });
