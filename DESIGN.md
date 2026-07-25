@@ -1,0 +1,182 @@
+# Flott — Design Manifest
+
+A "requirements.txt" for the website design: everything the site is built from — tech, tokens,
+components, motion, and the method behind the animation work. Everything below is drawn from the
+actual source ([index.html](index.html), [style.css](style.css), [script.js](script.js)).
+
+---
+
+## 1. Tech stack (the actual "requirements")
+
+No framework, no build step, no package manager, no `node_modules`. Pure static files.
+
+| Requirement | Version / note |
+| --- | --- |
+| HTML5 | single page — [index.html](index.html) |
+| CSS3 | one hand-written stylesheet — [style.css](style.css) (~2200 lines) |
+| JavaScript | vanilla, ES5-flavored (no transpile) — [script.js](script.js) |
+| Dev server | `python -m http.server` (see [.claude/launch.json](../.claude/launch.json)) |
+| External deps | **only** Google Fonts — everything else is local |
+
+**Browser APIs relied on** (all with graceful fallbacks):
+`<dialog>` + `showModal`, `IntersectionObserver`, Canvas 2D, `matchMedia`, Pointer Events,
+`requestAnimationFrame`, CSS `@starting-style` + `transition-behavior: allow-discrete`,
+`backdrop-filter`.
+
+---
+
+## 2. Typography
+
+Loaded via Google Fonts (`display=swap`):
+
+- **Golos Text** — primary UI/display face, weights 400–800
+- **Inter** — loaded as a companion face, weights 400–800
+- Stack: `"Golos Text", -apple-system, "Segoe UI", Roboto, sans-serif`
+
+Fluid type scale (all `clamp()`-based):
+
+| Role | Size |
+| --- | --- |
+| `h1` | `clamp(3.2rem, 8.2vw, 6.6rem)`, line-height 0.98, weight 600 |
+| `h2` | `clamp(2.2rem, 4.6vw, 3.8rem)`, weight 600 |
+| `.h2-sm` | `clamp(1.9rem, 3.4vw, 2.8rem)` |
+| `h3` | `1.25rem`, weight 600 |
+| `.eyebrow` | `0.8rem`, uppercase, letter-spacing `0.14em`, blue |
+| body | 1rem / line-height 1.5, `-webkit-font-smoothing: antialiased` |
+
+---
+
+## 3. Color tokens
+
+**Light system** (`:root`, [style.css:6](style.css)) — fruitful.com-inspired blue / white / black:
+
+| Token | Value | Use |
+| --- | --- | --- |
+| `--black` | `#0a0b10` | text, dark sections |
+| `--ink-60` / `--ink-40` | `rgba(10,11,16,.62 / .42)` | secondary text |
+| `--white` | `#ffffff` | surfaces |
+| `--blue` | `#2353e8` | primary brand / accents |
+| `--blue-deep` | `#1a3fc4` | hover states |
+| `--blue-ink` | `#12309e` | text-on-white accents |
+| `--blue-text-on` | `#d9e4ff` | text on blue fills |
+| `--tint-blue` | `#eaf1ff` | soft blue backgrounds |
+| `--tint-gray` | `#f5f7fb` | panels, chat body |
+| `--tint-chip` | `#d7e4ff` | chips / button hover |
+| `--line` / `--line-strong` | `rgba(10,11,16,.08 / .14)` | borders |
+
+**Hero / video system** (`.vhero` scope, [style.css:2148](style.css)) — deep navy + cyan:
+
+| Token | Value |
+| --- | --- |
+| `--grad-start` / `--grad-end` | `#174CEA` → `#082677` |
+| `--cyan` | `#5FFFF3` (hero primary CTA, highlights) |
+| `--navy-deep` | `#0A1B4D` |
+| `--btn-navy` | `#0B2E92` |
+| `--text-soft` | `#D7E1FB` |
+| `--hero-video-bg` | `#e2e5ea` (fallback fill behind hero.mp4) |
+
+---
+
+## 4. Shape & motion tokens
+
+| Token | Value | Meaning |
+| --- | --- | --- |
+| `--r-lg` / `--r-md` / `--r-sm` | `28px` / `20px` / `14px` | corner radii |
+| `--ease` | `cubic-bezier(0.16, 1, 0.3, 1)` | the house curve (expo-out) — used everywhere |
+| `--ease-out-expo` | `cubic-bezier(0.16, 1, 0.3, 1)` | same curve, hero-scope alias |
+
+**Motion conventions applied** (see §7): UI transitions kept **< 300ms**; entrances use
+ease-out/expo (never ease-in); only `transform` + `opacity` animated on the GPU;
+`prefers-reduced-motion` honored throughout; hover effects gated to fine pointers.
+
+---
+
+## 5. Component inventory
+
+| Component | Where | Notes |
+| --- | --- | --- |
+| Floating pill **navbar** | `.navbar` | glass, unfolds on load, solidifies on scroll, mobile burger→X + drop-down menu |
+| **Hero** (full-bleed video) | `.vhero` | `hero.mp4` background, staggered text reveal, mute toggle, animated "pipe" canvas |
+| Trust **marquee** | `.marquee` | infinite partner/registration ticker |
+| **Flott AI** cards | `.ai-grid`, `.ai-card`, `.ai-demo` | typewriter demo bubbles → open chat dialog |
+| **AI chat dialog** | `<dialog class="ai-dialog">` | FLIP open, flying avatar, shrink-back close, typing sequence |
+| **How it works** merge scene | `#mergeScene` | scroll-driven SVG "wires" merging three parties → six steps |
+| **Cabinet** demo | `.cab`, `#cabNav` | interactive dashboard, tab-switch with re-render animation |
+| **Feature rows** (01/02/03) | `.feature-row` | bank card-deck (swap + tilt), client & underwriter panels (tilt) |
+| **Live / traction** | `.live-grid`, `.pipeline` | result cards + deal-cycle pipeline |
+| **Security** certs | `.cert-grid`, `.cert-card` | registration/audit cards |
+| **CTA** | `.cta` | magnetic primary button |
+| **Footer** | `.site-footer` | brand + link columns |
+
+---
+
+## 6. Animation inventory
+
+**CSS keyframes** ([style.css](style.css)):
+
+| Name | Purpose |
+| --- | --- |
+| `navbar-unfold` | navbar expands from a thin center line on load |
+| `fade-rise` / `fade-rise-scale` | staggered entrance for hero + navbar items |
+| `marquee` | infinite horizontal ticker |
+| `float` / `pulse` | ambient idle motion |
+| `unreadFlicker` | "1" unread dot on AI bubbles |
+| `aiCaret` / `typingDot` | typewriter caret + chat typing indicator |
+| `aiDimIn` / `aiDlgIn` | chat backdrop dim + message entrance |
+| `cabIn` | cabinet content on tab switch |
+| `flow` | animated flow along the merge-scene wires |
+
+**JS-driven motion** ([script.js](script.js)):
+
+| Effect | Type |
+| --- | --- |
+| Hero reveal choreography (video → navbar unfold + text stagger) | timed, video-gated |
+| Navbar solid-on-scroll | scroll state toggle |
+| Mobile menu open/close | `@starting-style` + `allow-discrete` transition |
+| Hero "pipe" background | Canvas 2D animation loop |
+| Merge scene | scroll-driven (rAF, `getBoundingClientRect`) |
+| Bank card deck | click-swap + scroll parallax + hover fan |
+| Panel tilt (01/02/03 cards) | cursor-reactive 3D via `--tx/--ty` vars |
+| Magnetic CTA button | cursor-follow translate |
+| AI grid parallax | scroll parallax |
+| AI chat open | two-phase FLIP + flying avatar (Telegram-style) |
+| AI chat close | reverse FLIP — shrinks back into the source bubble |
+| Typewriter bubbles | `IntersectionObserver` + timed typing |
+| Section reveals | `IntersectionObserver` (`.reveal` → `.in`) |
+
+---
+
+## 7. Design method — the "skills" applied
+
+The motion work follows **Emil Kowalski's animation philosophy** (animations.dev), applied through
+three review skills used during development:
+
+- **review-animations** — audits motion against a high craft bar (the "ten non-negotiable standards").
+- **find-animation-opportunities** — finds places that *should* animate, rejects the rest (restraint-first).
+- **animation-vocabulary** — names effects precisely (e.g. *shared-element transition*, *magnetic*, *FLIP*).
+
+**Standards enforced across the site:**
+
+1. Every animation has a purpose (feedback / spatial continuity / state / delight) — no motion for its own sake.
+2. Frequency-appropriate: frequent interactions are subtle & fast; first-load/rare moments carry the delight budget.
+3. Responsive easing — ease-out / custom expo curve; **never** ease-in on UI.
+4. UI transitions **< 300ms** (longer only for the deliberately showy first-load hero/chat sequences).
+5. Correct origins & physicality — popovers/menus scale from their trigger, never from `scale(0)`.
+6. Interruptible where needed (CSS transitions / retargeting, not restart-from-zero keyframes).
+7. **GPU-only** — `transform` + `opacity` only; no animating layout properties.
+8. Accessibility — `prefers-reduced-motion` honored (gentler, not zero); hover gated to `(hover: hover) and (pointer: fine)`.
+9. Asymmetric enter/exit where it reads better (e.g. slow, showy chat open vs quick close).
+10. Cohesion — one house easing curve (`cubic-bezier(0.16, 1, 0.3, 1)`) unifies the whole product.
+
+Design language: **fruitful.com-inspired** — blue / white / black, generous whitespace, rounded pills,
+soft blue-tinted shadows.
+
+---
+
+## 8. Accessibility & resilience
+
+- `@media (prefers-reduced-motion: reduce)` blocks throughout — every scroll/FLIP/parallax effect degrades to a static or fade-only state.
+- Hover effects (tilt, magnetic, nav links) gated behind `(hover: hover) and (pointer: fine)`.
+- `<noscript>` fallback forces all entrance animations to their final visible state.
+- ARIA: labeled dialog, burger (`aria-expanded`/`aria-controls`), mute toggle (`aria-pressed`), nav landmarks.
+- Semantic HTML, `<dialog>` for the modal (native focus trap + Esc), keyboard-openable AI cards.

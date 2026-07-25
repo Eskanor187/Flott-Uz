@@ -7,7 +7,7 @@
   <meta name="description" content="Flott автоматизирует факторинг от заявки до выплаты: банк, поставщик и покупатель на одной платформе. Деньги за часы, подпись E-IMZO, скоринг в реальном времени.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Voltaire&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>

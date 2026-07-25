@@ -24,10 +24,7 @@
   --r-md: 20px;
   --r-sm: 14px;
 
-  --font: "Inter", -apple-system, "Segoe UI", Roboto, sans-serif;
-  /* Voltaire is a display face and ships a single weight (400) — headings use
-     it at 400 to avoid faux-bold. */
-  --font-head: "Voltaire", "Golos Text", var(--font);
+  --font: "Golos Text", -apple-system, "Segoe UI", Roboto, sans-serif;
   --ease: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
@@ -83,13 +80,6 @@ h3 {
   font-size: 1.25rem;
   font-weight: 600;
   letter-spacing: -0.015em;
-}
-
-/* Voltaire display headings — single weight, so pin to 400 and disable synthesis */
-h1, h2, h3, .h2-sm {
-  font-family: var(--font-head);
-  font-weight: 400;
-  font-synthesis-weight: none;
 }
 
 .eyebrow {
@@ -2454,7 +2444,7 @@ h1, h2, h3, .h2-sm {
 
 .headline {
   color: #fff;
-  font-weight: 400; /* Voltaire ships a single weight */
+  font-weight: 800;
   font-size: clamp(40px, 5vw, 64px);
   line-height: 1.05;
   letter-spacing: -0.01em;
