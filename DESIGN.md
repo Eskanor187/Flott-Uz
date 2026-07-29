@@ -29,18 +29,22 @@ No framework, no build step, no package manager, no `node_modules`. Pure static 
 
 Loaded via Google Fonts (`display=swap`):
 
-- **Golos Text** — primary UI/display face, weights 400–800
-- **Inter** — loaded as a companion face, weights 400–800
-- Stack: `"Golos Text", -apple-system, "Segoe UI", Roboto, sans-serif`
+- **Inter** — the whole page, body and headings alike, weights 400–800
+- **Playfair Display** — italic only (400/500), used for the first line of the
+  hero headline and nothing else
+- Stack: `"Inter", -apple-system, "Segoe UI", Roboto, sans-serif`
+- `--font-head` resolves to `var(--font)`; there is no separate display face.
+  (Voltaire was the display face until the hero was replaced — it's gone.)
 
 Fluid type scale (all `clamp()`-based):
 
 | Role | Size |
 | --- | --- |
-| `h1` | `clamp(3.2rem, 8.2vw, 6.6rem)`, line-height 0.98, weight 600 |
-| `h2` | `clamp(2.2rem, 4.6vw, 3.8rem)`, weight 600 |
-| `.h2-sm` | `clamp(1.9rem, 3.4vw, 2.8rem)` |
-| `h3` | `1.25rem`, weight 600 |
+| `h1` | `clamp(3.2rem, 8.2vw, 6.6rem)`, line-height 0.98, weight 400 |
+| `h2` | `clamp(2.2rem, 4.6vw, 3.8rem)`, weight 400 |
+| `.h2-sm` | `clamp(1.9rem, 3.4vw, 2.8rem)`, weight 400 |
+| `h3` | `1.25rem`, weight 600 — small enough that 400 reads flabby |
+| `.ihero-h1` | `clamp(40px, min(7.4vw, 7.8vh), 96px)`, weight 400 |
 | `.eyebrow` | `0.8rem`, uppercase, letter-spacing `0.14em`, blue |
 | body | 1rem / line-height 1.5, `-webkit-font-smoothing: antialiased` |
 
@@ -64,16 +68,14 @@ Fluid type scale (all `clamp()`-based):
 | `--tint-chip` | `#d7e4ff` | chips / button hover |
 | `--line` / `--line-strong` | `rgba(10,11,16,.08 / .14)` | borders |
 
-**Hero / video system** (`.vhero` scope, [style.css:2148](style.css)) — deep navy + cyan:
+**Hero** (`.ihero` scope) — no palette of its own: it's the ice still and the
+water clip, white type over both, and the site's own `.panel` for the invoice
+card. The seam rule is `#b3d3ea`, sampled from the ice highlights down the
+centre strip so it sits in the image's own tonal range.
 
-| Token | Value |
-| --- | --- |
-| `--grad-start` / `--grad-end` | `#174CEA` → `#082677` |
-| `--cyan` | `#5FFFF3` (hero primary CTA, highlights) |
-| `--navy-deep` | `#0A1B4D` |
-| `--btn-navy` | `#0B2E92` |
-| `--text-soft` | `#D7E1FB` |
-| `--hero-video-bg` | `#e2e5ea` (fallback fill behind hero.mp4) |
+The deep-navy/cyan tokens below (`--grad-start`, `--cyan`, `--navy-deep`,
+`--btn-navy`, `--text-soft`, `--hero-video-bg`) belong to the retired
+full-bleed-video hero and are no longer referenced by `style.css`.
 
 ---
 
@@ -96,7 +98,7 @@ ease-out/expo (never ease-in); only `transform` + `opacity` animated on the GPU;
 | Component | Where | Notes |
 | --- | --- | --- |
 | Floating pill **navbar** | `.navbar` | glass, unfolds on load, solidifies on scroll, mobile burger→X + drop-down menu |
-| **Hero** (full-bleed video) | `.vhero` | `hero.mp4` background, staggered text reveal, mute toggle, animated "pipe" canvas |
+| **Hero** (ice / water split) | `.ihero` | `ice.png` still and looping `water_flow.mp4`, hard cut down a swelling seam (canvas mask + SVG rule, both from one wave function in `script.js`); frozen invoice `.panel` left, «Доступно сегодня» right |
 | Trust **marquee** | `.marquee` | infinite partner/registration ticker |
 | **Flott AI** cards | `.ai-grid`, `.ai-card`, `.ai-demo` | typewriter demo bubbles → open chat dialog |
 | **AI chat dialog** | `<dialog class="ai-dialog">` | FLIP open, flying avatar, shrink-back close, typing sequence |

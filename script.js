@@ -1,69 +1,214 @@
-// Seconds into hero.mp4 when the reveal fires: the navbar unfolds from a
-// thin center line while the hero text staggers in alongside it — all
-// choreographed with CSS animation-delays in styles.css, static ~1.85s
-// after this moment.
-const REVEAL_TIME = 2;
+// --- Hero: the ice/water hard cut ------------------------------------------
+//
+// The water video plays across the whole viewport; a canvas mask decides where
+// it shows through the ice. The divide isn't straight — it sways like a slow
+// swell, and the mask's blend, the rule that hides the join and the badge all
+// ride that one curve, which is what keeps the rule over the seam at every
+// height.
 
-// Flat delay before revealing everything when the video can't load or autoplay.
-const FALLBACK_DELAY = 1500;
+const WAVE_AMPLITUDE = 26;
+const WAVE_LENGTH = 440;
 
-let hasRevealed = false;
+// Diameter of the Flott badge sitting on the seam.
+const LOGO_SIZE = 92;
 
-const video = document.getElementById('hero-video');
+// Width of the ice→water blend in the mask, centered on the split. The rule
+// that covers it must stay wider (stroke-width in the markup) or the join
+// between the still image and the video shows past the rule's edges.
+const SEAM_W = LOGO_SIZE / 2;
+
+const waveOffset = (y) => WAVE_AMPLITUDE * Math.sin((y / WAVE_LENGTH) * Math.PI * 2);
+
 const navbar = document.getElementById('navbar');
-const heroText = document.getElementById('hero-text');
-const muteToggle = document.getElementById('mute-toggle');
 const burger = document.getElementById('nav-burger');
 const navLinks = document.getElementById('nav-links');
 
-function reveal() {
-  if (hasRevealed) return;
-  hasRevealed = true;
-  navbar.classList.add('v-reveal');
-  heroText.classList.add('v-reveal');
-}
+const hero = document.querySelector('.ihero');
+const heroWater = document.getElementById('ihero-water');
+const heroSeam = document.getElementById('ihero-seam');
+const heroSeamPath = document.getElementById('ihero-seam-path');
+const heroBadge = document.getElementById('ihero-badge');
+const heroTagline = document.getElementById('ihero-tagline');
 
-function scheduleFallbackReveal() {
-  setTimeout(reveal, FALLBACK_DELAY);
-}
+function paintHero() {
+  const w = hero.clientWidth;
+  const h = hero.clientHeight;
+  if (!w || !h) return;
 
-if (video) {
-  video.addEventListener('timeupdate', () => {
-    if (video.currentTime >= REVEAL_TIME) reveal();
-  });
+  const splitX = w * 0.5;
 
-  // If the clip ever gets re-exported shorter than REVEAL_TIME, 'ended'
-  // still fires — never leave the page hidden.
-  video.addEventListener('ended', reveal);
-  video.addEventListener('error', scheduleFallbackReveal);
+  // Walk the canvas a row at a time, sliding the blend along the wave so the
+  // ice gives way to water on a curve instead of a straight edge. Each row
+  // ramps transparent → opaque across the seam band; a linear gradient clamps
+  // both end stops, so everything left of the band stays pure ice and
+  // everything right of it is fully revealed water. Cheap enough to do inline
+  // — this runs on load and resize, never per frame.
+  const canvas = document.createElement('canvas');
+  canvas.width = w;
+  canvas.height = h;
+  const ctx = canvas.getContext('2d');
 
-  // The autoplay attribute usually handles playback; calling play() as well
-  // gives us a rejection signal when the browser blocks autoplay.
-  const playAttempt = video.play();
-  if (playAttempt !== undefined) {
-    playAttempt.catch(scheduleFallbackReveal);
+  for (let y = 0; y < h; y++) {
+    const cx = splitX + waveOffset(y);
+    const gradient = ctx.createLinearGradient(cx - SEAM_W / 2, 0, cx + SEAM_W / 2, 0);
+    gradient.addColorStop(0, 'rgba(255, 255, 255, 0)');
+    gradient.addColorStop(0.12, 'rgba(255, 255, 255, 0.12)');
+    gradient.addColorStop(0.25, 'rgba(255, 255, 255, 0.4)');
+    gradient.addColorStop(0.5, 'rgba(255, 255, 255, 0.5)');
+    gradient.addColorStop(0.75, 'rgba(255, 255, 255, 0.85)');
+    gradient.addColorStop(1, 'rgba(255, 255, 255, 1)');
+
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, y, w, 1);
   }
 
-  // Belt and braces: if playback never actually started (stalled load,
-  // silent autoplay block), force the reveal.
-  setTimeout(() => {
-    if (!hasRevealed && (video.paused || video.currentTime === 0)) reveal();
-  }, 4000);
-} else {
-  scheduleFallbackReveal();
+  const mask = `url(${canvas.toDataURL()})`;
+  heroWater.style.maskImage = mask;
+  heroWater.style.webkitMaskImage = mask;
+
+  // The rule traces the same wave the mask blends along. Sampled every 4px and
+  // run past both edges so the stroke covers the full height.
+  const points = [];
+  for (let y = -60; y <= h + 60; y += 4) {
+    points.push(`${(splitX + waveOffset(y)).toFixed(2)},${y}`);
+  }
+  heroSeam.setAttribute('viewBox', `0 0 ${w} ${h}`);
+  heroSeamPath.setAttribute('d', `M${points.join('L')}`);
+
+  // The badge and the tagline locked up under it ride the wave too, or they
+  // would drift off the line.
+  const badgeX = splitX + waveOffset(h / 2);
+  heroBadge.style.left = `${badgeX}px`;
+  heroTagline.style.left = `${badgeX}px`;
 }
 
-// --- Mute toggle -----------------------------------------------------------
+if (hero && heroWater) {
+  paintHero();
 
-if (muteToggle && video) {
-  muteToggle.addEventListener('click', () => {
-    video.muted = !video.muted;
-    const unmuted = !video.muted;
-    muteToggle.classList.toggle('unmuted', unmuted);
-    muteToggle.setAttribute('aria-pressed', String(unmuted));
-    muteToggle.setAttribute('aria-label', unmuted ? 'Выключить звук' : 'Включить звук');
+  // paintHero bails when the hero has no size yet, which happens if this runs
+  // before layout settles (or in a tab that never rendered). 'load' is the
+  // backstop — without it the mask would stay unpainted until a resize.
+  window.addEventListener('load', paintHero);
+
+  // Resizing the canvas clears it, so the mask has to be repainted even on a
+  // height-only change. Coalesce bursts of resize events into one repaint.
+  let pendingPaint;
+  window.addEventListener('resize', () => {
+    clearTimeout(pendingPaint);
+    pendingPaint = setTimeout(paintHero, 100);
   });
 }
+
+// --- The seam, continued down the page -------------------------------------
+//
+// The hero's rule stops at the fold; this carries the same line on through the
+// page as a thread that meanders and narrows, drawn in as the reader scrolls.
+// Decorative only, and it sits behind every section.
+
+const RIVER_WAVE = 1150; // the long, lazy meander
+const RIVER_AMP = 70;
+const RIVER_WAVE_2 = 430; // a second, smaller sway, so it doesn't read as a sine
+const RIVER_AMP_2 = 16;
+const RIVER_HEAD = 27; // half-width at the fold — matches the hero's rule
+const RIVER_TAIL = 1.5; // half-width once it has settled into a thread
+const RIVER_TAPER = 210; // px over which it narrows
+const RIVER_STEP = 12; // sampling along the run
+
+const flowLine = document.getElementById('flow-line');
+const flowLinePath = document.getElementById('flow-line-path');
+const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+function buildFlowLine() {
+  const heroTop = hero.getBoundingClientRect().top + window.scrollY;
+  const top = heroTop + hero.clientHeight;
+  const height = Math.max(0, document.body.scrollHeight - top);
+  const width = document.documentElement.clientWidth;
+  if (!height || !width) return;
+
+  // Start exactly where the hero's seam left off, and set off in the direction
+  // it was already heading, so the join doesn't read as a second line.
+  const startX = width * 0.5 + waveOffset(hero.clientHeight);
+  const heading =
+    Math.cos((hero.clientHeight / WAVE_LENGTH) * Math.PI * 2) >= 0 ? 1 : -1;
+
+  const centerX = (t) =>
+    startX +
+    heading *
+      (RIVER_AMP * Math.sin((t / RIVER_WAVE) * Math.PI * 2) +
+        RIVER_AMP_2 * Math.sin((t / RIVER_WAVE_2) * Math.PI * 2));
+  const halfWidth = (t) =>
+    RIVER_TAIL + (RIVER_HEAD - RIVER_TAIL) * Math.exp(-t / RIVER_TAPER);
+
+  // Down one bank and back up the other — a filled ribbon rather than a stroke,
+  // because the width has to change along the run.
+  const right = [];
+  const left = [];
+  for (let t = 0; t <= height; t += RIVER_STEP) {
+    const cx = centerX(t);
+    const hw = halfWidth(t);
+    right.push(`${(cx + hw).toFixed(1)},${t}`);
+    left.push(`${(cx - hw).toFixed(1)},${t}`);
+  }
+  left.reverse();
+
+  flowLine.style.top = `${top}px`;
+  flowLine.style.width = `${width}px`;
+  flowLine.style.height = `${height}px`;
+  flowLine.setAttribute('viewBox', `0 0 ${width} ${height}`);
+  flowLinePath.setAttribute('d', `M${right.join('L')}L${left.join('L')}Z`);
+  revealFlowLine();
+}
+
+// Drawn in to a little short of the fold, so the tip stays just ahead of the
+// reader instead of being pinned to the bottom edge of the window. This is all
+// that runs on scroll — one clip-path string, no geometry, no measuring.
+function revealFlowLine() {
+  const height = parseFloat(flowLine.style.height);
+  if (!height) return;
+  if (reduceMotion) {
+    flowLine.style.clipPath = 'none';
+    return;
+  }
+  const top = parseFloat(flowLine.style.top) || 0;
+  const drawn = window.scrollY + window.innerHeight * 0.92 - top;
+  const pct = Math.min(100, Math.max(0, (drawn / height) * 100));
+  flowLine.style.clipPath = `inset(0 0 ${(100 - pct).toFixed(2)}% 0)`;
+}
+
+if (flowLine && flowLinePath && hero) {
+  buildFlowLine();
+
+  // Same backstop as the mask: the first pass bails if the page hasn't laid
+  // out yet, and the section reveals keep changing the document height.
+  window.addEventListener('load', buildFlowLine);
+
+  let pendingLine;
+  window.addEventListener('resize', () => {
+    clearTimeout(pendingLine);
+    pendingLine = setTimeout(buildFlowLine, 100);
+  });
+
+  let linePending = false;
+  window.addEventListener(
+    'scroll',
+    () => {
+      if (linePending) return;
+      linePending = true;
+      requestAnimationFrame(() => {
+        revealFlowLine();
+        linePending = false;
+      });
+    },
+    { passive: true },
+  );
+}
+
+// The navbar unfolds from a thin center line while the hero staggers in
+// alongside it — choreographed with CSS animation-delays in style.css.
+setTimeout(() => {
+  if (navbar) navbar.classList.add('v-reveal');
+  if (hero) hero.classList.add('v-reveal');
+}, 0);
 
 // --- Mobile menu -----------------------------------------------------------
 

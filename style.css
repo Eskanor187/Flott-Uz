@@ -25,9 +25,8 @@
   --r-sm: 14px;
 
   --font: "Inter", -apple-system, "Segoe UI", Roboto, sans-serif;
-  /* Voltaire is a display face and ships a single weight (400) — headings use
-     it at 400 to avoid faux-bold. */
-  --font-head: "Voltaire", "Golos Text", var(--font);
+  /* Headings run on the same face as the hero — see the h1/h2/h3 rule. */
+  --font-head: var(--font);
   --ease: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
@@ -85,11 +84,16 @@ h3 {
   letter-spacing: -0.015em;
 }
 
-/* Voltaire display headings — single weight, so pin to 400 and disable synthesis */
-h1, h2, h3, .h2-sm {
+/* Headings run on the hero's Inter, not a display face. The display sizes stay
+   at 400 to match the hero headline (Inter 400 at 56–96px); h3 is small enough
+   that 400 reads flabby, so it keeps the 600 declared above. */
+h1, h2, .h2-sm {
   font-family: var(--font-head);
   font-weight: 400;
-  font-synthesis-weight: none;
+}
+
+h3 {
+  font-family: var(--font-head);
 }
 
 .eyebrow {
@@ -443,9 +447,22 @@ h1, h2, h3, .h2-sm {
 
 /* ---------- Marquee ---------- */
 
+/* The seam, continued past the fold. z-index: -1 puts it under every in-flow
+   section but still above the page's white canvas, so it shows through the
+   transparent sections and the opaque ones — the marquee, the dark band, the
+   blue CTA, the footer — simply cover it. Geometry is set in script.js. */
+.flow-line {
+  position: absolute;
+  left: 0;
+  z-index: -1;
+  pointer-events: none;
+}
+
+/* No background here: it was white on a white page, and dropping it lets the
+   flow line pass behind the ticker instead of being cut off right under the
+   hero, where the taper reads. */
 .marquee-strip {
   padding: 46px 0 26px;
-  background: var(--white);
 }
 
 .marquee {
@@ -2371,185 +2388,259 @@ h1, h2, h3, .h2-sm {
    Hero
    ============================================================ */
 
-.vhero {
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  padding: 150px 0 60px;
+/* Ice on the left, water on the right, hard cut down the middle. The divide
+   isn't straight — it sways like a slow swell, and the mask's blend, the rule
+   that covers it and the badge all ride that one curve (see script.js). */
+
+.ihero {
   position: relative;
-  z-index: 1;
+  width: 100%;
+  height: 100vh;
+  height: 100dvh;
   overflow: hidden;
+  z-index: 1;
+  background: #9cc3e8;
+  letter-spacing: -0.02em;
 }
 
-/* Full-bleed video background */
-.hero-bg {
+.ihero-ice {
   position: absolute;
   inset: 0;
-  z-index: 0;
-  background: var(--hero-video-bg);
+  z-index: 1;
+  background: url("ice.png") center / cover no-repeat;
 }
 
-.hero-video {
+/* mask-size is 100% of this box and the seam is painted in viewport
+   coordinates, so this must stay exactly viewport-sized. */
+.ihero-water {
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
-  /* Bias the crop toward the safe (it sits centered-slightly-right in the
-     source frame) when the viewport isn't 16:9. */
-  object-position: 65% 50%;
+  z-index: 3;
+  pointer-events: none;
+  -webkit-mask-size: 100% 100%;
+  mask-size: 100% 100%;
+}
+
+.ihero-seam {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 4;
+  pointer-events: none;
+}
+
+/* left is set from the wave in script.js so the badge stays on the line */
+.ihero-badge {
+  position: absolute;
+  top: 50%;
+  z-index: 4;
+  width: 92px;
+  height: 92px;
+  border-radius: 50%;
+  overflow: hidden;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.6), 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+.ihero-badge img {
   display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scale(1.05);
 }
 
-.hero-inner {
-  position: relative;
-  z-index: 1;
-  width: min(1450px, 90%);
-  margin: 0 auto;
+/* Headline sits above the badge; the tagline locks up under it on the seam,
+   in the same white but held back so it reads as secondary. */
+
+.ihero-head {
+  position: absolute;
+  top: 14%;
+  left: 0;
+  right: 0;
+  z-index: 5;
+  padding: 0 20px;
+  text-align: center;
+  pointer-events: none;
 }
 
-.hero-text {
-  max-width: 620px;
+/* Inter, not the site's Voltaire — the second line is the sans half of the
+   lockup against the Playfair italic above it.
+
+   Sized off the viewport HEIGHT as well as its width: the Russian headline is
+   ~30% wider than the English original it was translated from, so on a short
+   screen a width-only clamp runs the second line straight under the invoice
+   card. The vh term is what keeps the headline clear of it. */
+.ihero-h1 {
+  margin: 0;
+  color: #fff;
+  font-family: var(--font);
+  font-weight: 400;
+  font-size: clamp(40px, min(7.4vw, 7.8vh), 96px);
+  line-height: 0.95;
 }
 
-/* Hero entrance — see the choreography map above the navbar rules */
-.v-eyebrow,
-.headline .line,
-.subtext,
-.hero-buttons .v-btn {
+.ihero-h1 .line { display: block; }
+
+.ihero-serif {
+  font-family: "Playfair Display", Georgia, serif;
+  font-style: italic;
+  letter-spacing: -0.05em;
+}
+
+.ihero-h1 .line + .line {
+  letter-spacing: -0.06em;
+  margin-top: -4px;
+}
+
+/* left is set from the wave in script.js, same as the badge */
+.ihero-tagline {
+  position: absolute;
+  top: calc(50% + 60px);
+  z-index: 4;
+  width: max-content;
+  max-width: 92vw;
+  transform: translateX(-50%);
+  text-align: center;
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 500;
+  /* Above 980px the hero is three columns — card, tagline, card — and the two
+     cards are a fixed 300px sitting calc(20% - 120px) in from each edge, so
+     the strip left over is (60vw - 360px). Take another ~52px off it for the
+     swell, which can throw the seam 26px either way, and divide by the width
+     one character costs at this weight. Below 980px the cards are gone, so the
+     media query hands the tagline back a plain width-based size. */
+  font-size: clamp(26px, calc((60vw - 412px) / 6.4), 60px);
+  line-height: 0.95;
+  pointer-events: none;
+}
+
+.ihero-tagline span { display: block; }
+
+/* Frozen side — the site's own .panel, so the hero shows the real product
+   surface. Only the amount is out of reach, so the blur sits on the value. */
+
+.ihero-invoice {
+  position: absolute;
+  top: 50%;
+  left: calc(20% - 120px);
+  z-index: 5;
+  width: 300px;
+  transform: translateY(-50%);
+}
+
+.ihero-panel { padding: 24px; }
+.ihero-panel .panel-head { margin-bottom: 22px; }
+.ihero-panel .stat-value { font-size: 26px; }
+.ihero-panel .kv-row:first-child { margin-top: 4px; }
+
+.ihero-frost {
+  filter: blur(5.5px);
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* Liquid side — same money, past the line */
+
+.ihero-available {
+  position: absolute;
+  top: 50%;
+  right: calc(20% - 120px);
+  z-index: 5;
+  width: 300px;
+  transform: translateY(-50%);
+  text-align: center;
+  color: #fff;
+}
+
+.ihero-avail-label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.ihero-avail-label i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 10px 2px rgba(255, 255, 255, 0.85);
+}
+
+.ihero-avail-sum {
+  margin-top: 10px;
+  font-size: clamp(28px, 2.6vw, 33px);
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  text-shadow: 0 2px 12px rgba(8, 40, 66, 0.55);
+}
+
+.ihero-avail-sum small {
+  margin-left: 6px;
+  font-size: 16px;
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.ihero-avail-meta {
+  margin-top: 10px;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.ihero-cta { margin-top: 22px; }
+
+/* Hero entrance — see the choreography map above the navbar rules. The two
+   centred blocks get an opacity-only fade: fade-rise animates transform, which
+   would fight their translateY(-50%). */
+
+.ihero-h1 .line,
+.ihero-tagline,
+.ihero-invoice,
+.ihero-available {
   opacity: 0;
 }
 
-.hero-text.v-reveal .v-eyebrow {
-  opacity: 1;
-  animation: fade-rise 0.45s var(--ease-out-expo) 0.2s backwards;
-}
-
-.hero-text.v-reveal .headline .line {
+.ihero.v-reveal .ihero-h1 .line {
   opacity: 1;
   animation: fade-rise 0.5s var(--ease-out-expo) backwards;
 }
 
-.hero-text.v-reveal .headline .line:nth-child(1) { animation-delay: 0.3s; }
-.hero-text.v-reveal .headline .line:nth-child(2) { animation-delay: 0.45s; }
+.ihero.v-reveal .ihero-h1 .line:nth-child(1) { animation-delay: 0.3s; }
+.ihero.v-reveal .ihero-h1 .line:nth-child(2) { animation-delay: 0.45s; }
 
-.hero-text.v-reveal .subtext {
+.ihero.v-reveal .ihero-tagline {
   opacity: 1;
-  animation: fade-rise 0.4s var(--ease-out-expo) 0.95s backwards;
+  animation: ihero-fade 0.5s var(--ease-out-expo) 0.6s backwards;
 }
 
-.hero-text.v-reveal .hero-buttons .v-btn {
+.ihero.v-reveal .ihero-invoice {
   opacity: 1;
-  animation: fade-rise-scale 0.45s var(--ease-out-expo) backwards;
+  animation: ihero-fade 0.55s var(--ease-out-expo) 0.85s backwards;
 }
 
-.hero-text.v-reveal .hero-buttons .v-btn-primary { animation-delay: 1.3s; }
-.hero-text.v-reveal .hero-buttons .v-btn-secondary { animation-delay: 1.4s; }
-
-.v-eyebrow {
-  color: var(--cyan);
-  font-size: 14px;
-  font-weight: 600;
-  letter-spacing: 0.12em;
-  margin-bottom: 20px;
+.ihero.v-reveal .ihero-available {
+  opacity: 1;
+  animation: ihero-fade 0.55s var(--ease-out-expo) 1s backwards;
 }
 
-.headline {
-  color: #fff;
-  font-weight: 400; /* Voltaire ships a single weight */
-  font-size: clamp(40px, 5vw, 64px);
-  line-height: 1.05;
-  letter-spacing: -0.01em;
-  margin-bottom: 24px;
+@keyframes ihero-fade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
 }
-
-.headline .line {
-  display: block;
-}
-
-.subtext {
-  max-width: 480px;
-  color: var(--text-soft);
-  font-size: 17px;
-  line-height: 1.6;
-  margin-bottom: 36px;
-}
-
-.hero-buttons {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 16px;
-}
-
-.v-btn {
-  font-family: inherit;
-  font-weight: 700;
-  font-size: 15px;
-  letter-spacing: 0.03em;
-  padding: 16px 32px;
-  border-radius: 999px;
-  border: none;
-  cursor: pointer;
-  transition: filter 0.2s ease, transform 0.2s ease, background 0.2s ease, border-color 0.2s ease;
-}
-
-.v-btn-primary {
-  background: var(--cyan);
-  color: var(--navy-deep);
-}
-
-.v-btn-primary:hover {
-  filter: brightness(1.08);
-  transform: scale(1.03);
-}
-
-.v-btn-secondary {
-  background: transparent;
-  border: 1.5px solid rgba(255, 255, 255, 0.4);
-  color: #fff;
-  padding: 14.5px 30.5px; /* compensate for the border so both buttons match height */
-}
-
-.v-btn-secondary:hover {
-  border-color: rgba(255, 255, 255, 0.85);
-  background: rgba(255, 255, 255, 0.07);
-}
-
-/* Press feedback — snappy scale-down, wins over the hover scale */
-.v-btn:active {
-  transform: scale(0.97);
-  transition-duration: 0.12s;
-}
-
-/* ============================================================
-   Mute toggle
-   ============================================================ */
-
-.mute-toggle {
-  position: absolute;
-  right: 28px;
-  bottom: 28px;
-  z-index: 2;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background: rgba(8, 20, 60, 0.55);
-  -webkit-backdrop-filter: blur(8px);
-  backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.25);
-  color: #fff;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: background 0.2s ease;
-}
-
-.mute-toggle:hover {
-  background: rgba(8, 20, 60, 0.8);
-}
-
-.mute-toggle .icon-on { display: none; }
-.mute-toggle.unmuted .icon-on { display: block; }
-.mute-toggle.unmuted .icon-off { display: none; }
 
 /* ============================================================
    Responsive
@@ -2607,22 +2698,23 @@ h1, h2, h3, .h2-sm {
   .navbar.nav-open .nav-burger span:nth-child(2) { opacity: 0; }
   .navbar.nav-open .nav-burger span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
 
-  .vhero {
-    padding-top: 130px;
+  /* Below this width a 300px card would cross the seam, so the frozen half
+     drops out and the liquid half moves to the foot of the hero. */
+  .ihero-invoice {
+    display: none;
   }
 
-  .hero-text {
-    max-width: none;
-    text-align: center;
+  .ihero-available {
+    top: auto;
+    bottom: 40px;
+    left: 20px;
+    right: 20px;
+    width: auto;
+    transform: none;
   }
 
-  .subtext {
-    margin-left: auto;
-    margin-right: auto;
-  }
-
-  .hero-buttons {
-    justify-content: center;
+  .ihero-tagline {
+    font-size: clamp(28px, 8vw, 44px);
   }
 }
 
@@ -2650,10 +2742,10 @@ h1, h2, h3, .h2-sm {
   .navbar.v-reveal .nav-links a,
   .navbar.v-reveal .nav-cta,
   .navbar.v-reveal .nav-burger,
-  .hero-text.v-reveal .v-eyebrow,
-  .hero-text.v-reveal .headline .line,
-  .hero-text.v-reveal .subtext,
-  .hero-text.v-reveal .hero-buttons .v-btn {
+  .ihero.v-reveal .ihero-h1 .line,
+  .ihero.v-reveal .ihero-tagline,
+  .ihero.v-reveal .ihero-invoice,
+  .ihero.v-reveal .ihero-available {
     animation: none;
   }
 
