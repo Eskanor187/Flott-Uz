@@ -37,6 +37,10 @@
   </header>
 
 <main>
+<!-- The hero and the two money blocks share a wrapper so the blocks can be laid
+     over the hero on a wide screen and simply follow it on a phone, without
+     being two different bits of markup. -->
+<div class="hero-wrap">
 <section class="ihero" id="hero">
       <div class="ihero-ice" aria-hidden="true"></div>
 
@@ -72,6 +76,13 @@
         </h1>
       </div>
 
+    </section>
+
+    <!-- Above 980px these sit on the hero itself, one either side of the seam —
+         frozen on the ice, released on the water. A phone has no room for a
+         300px card beside a centred seam, so there they simply follow the hero
+         down the page and the pairing is read top-to-bottom instead. -->
+    <div class="ihero-cards">
       <!-- Frozen side: the document reads fine, only the money is out of reach,
            so the blur sits on the value rather than on the card. -->
       <div class="ihero-invoice">
@@ -98,11 +109,12 @@
         <p class="ihero-avail-meta">Счёт № FL-4412 · выплата Flott</p>
         <button class="btn btn-white ihero-cta magnetic" type="button">Запросить демо</button>
       </div>
-    </section>
+    </div>
+</div>
 
 <!-- The seam doesn't stop at the fold: it carries on down the page as a thread
-     that meanders and narrows, drawn in as the reader scrolls. Decorative only
-     — it sits behind every section (see .flow-line). -->
+     that meanders and narrows. Decorative only — it sits behind every section
+     (see .flow-line). -->
 <svg class="flow-line" id="flow-line" aria-hidden="true" preserveAspectRatio="none">
   <defs>
     <linearGradient id="flow-line-fade" x1="0" y1="0" x2="0" y2="1">
@@ -604,14 +616,69 @@
   </div>
 </section>
 
-<!-- ===== CTA ===== -->
-<section class="cta" id="cta">
-  <div class="container cta-inner">
-    <h2 class="reveal">Каждый день ожидания —<br>упущенная сделка.</h2>
-    <p class="cta-sub reveal d1">Подключите Flott — пилотный период бесплатно.</p>
-    <div class="cta-actions reveal d2">
-      <a href="mailto:info@flott.uz?subject=Запрос демо Flott" class="btn btn-white magnetic">Запросить демо</a>
-      <a href="https://flott.uz" class="btn btn-outline-light">flott.uz</a>
+<!-- ===== CTA — контактная форма ===== -->
+<section class="section contact-section" id="cta">
+  <div class="container">
+    <div class="contact-card reveal">
+
+      <!-- Синяя панель — тот же довод, что и раньше, плюс контакты -->
+      <aside class="contact-info">
+        <h2 class="contact-title">Каждый день ожидания —<br>упущенная сделка.</h2>
+        <p class="contact-lead">Подключите Flott — пилотный период бесплатно.</p>
+
+        <ul class="contact-list">
+          <li>
+            <span class="contact-ic" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+            </span>
+            <a href="mailto:info@flott.uz">info@flott.uz</a>
+          </li>
+          <li>
+            <span class="contact-ic" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20M2 12h20"/></svg>
+            </span>
+            <a href="https://flott.uz">flott.uz</a>
+          </li>
+          <li>
+            <span class="contact-ic" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/></svg>
+            </span>
+            <span>Ташкент, Узбекистан</span>
+          </li>
+        </ul>
+      </aside>
+
+      <!-- Статический сайт: отправка открывает почтовый клиент, см. script.js -->
+      <form class="contact-form" id="contactForm" novalidate>
+        <div class="field">
+          <label for="cfName">Ваше имя</label>
+          <input type="text" id="cfName" name="name" autocomplete="name" required
+            placeholder="Как к вам обращаться">
+        </div>
+        <div class="field">
+          <label for="cfEmail">Email</label>
+          <input type="email" id="cfEmail" name="email" autocomplete="email" required
+            placeholder="you@company.uz">
+        </div>
+        <div class="field field-wide">
+          <label for="cfCompany">Компания</label>
+          <input type="text" id="cfCompany" name="company" autocomplete="organization"
+            placeholder="Название организации">
+        </div>
+        <div class="field field-wide">
+          <label for="cfMessage">Сообщение</label>
+          <textarea id="cfMessage" name="message" rows="4"
+            placeholder="Коротко о задаче — объёмы, сроки, кто ваши покупатели"></textarea>
+        </div>
+        <div class="contact-actions">
+          <button class="btn btn-primary magnetic" type="submit">
+            Запросить демо
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4z"/></svg>
+          </button>
+          <p class="contact-note" id="contactNote" role="status"></p>
+        </div>
+      </form>
+
     </div>
   </div>
 </section>

@@ -113,29 +113,57 @@ const RIVER_HEAD = 27; // half-width at the fold — matches the hero's rule
 const RIVER_TAIL = 1.5; // half-width once it has settled into a thread
 const RIVER_TAPER = 210; // px over which it narrows
 const RIVER_STEP = 12; // sampling along the run
+const RIVER_BLEND = 360; // px over which the seam's curve hands over to the meander
 
 const flowLine = document.getElementById('flow-line');
 const flowLinePath = document.getElementById('flow-line-path');
 const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+// How far ahead of the reader the drawn tip runs — a little short of the fold,
+// so the line stays just ahead rather than pinned to the bottom of the window.
+const RIVER_LEAD = 0.92;
+
+// Where supported, the reveal is a native scroll-driven animation: the browser
+// ties it to the scroll offset itself, so nothing of ours runs per frame. The
+// rAF fallback below is the same effect done by hand for everyone else.
+const scrollTimeline =
+  typeof CSS !== 'undefined' &&
+  CSS.supports &&
+  CSS.supports('animation-timeline', 'scroll()');
+
 function buildFlowLine() {
+  // Straight off the hero's foot, so the thread picks up where the seam left
+  // off. It sits at z-index -1, so on a phone the two money blocks below simply
+  // pass over the top of it — the line stays continuous underneath.
   const heroTop = hero.getBoundingClientRect().top + window.scrollY;
   const top = heroTop + hero.clientHeight;
   const height = Math.max(0, document.body.scrollHeight - top);
   const width = document.documentElement.clientWidth;
   if (!height || !width) return;
 
-  // Start exactly where the hero's seam left off, and set off in the direction
-  // it was already heading, so the join doesn't read as a second line.
-  const startX = width * 0.5 + waveOffset(hero.clientHeight);
-  const heading =
-    Math.cos((hero.clientHeight / WAVE_LENGTH) * Math.PI * 2) >= 0 ? 1 : -1;
+  // Leave the fold on exactly the heading the seam arrived at. Matching only
+  // the position isn't enough — where the seam exits its slope is at most 0.37,
+  // while the meander's at t=0 is 0.62, so the join came out as a corner. The
+  // old ±1 heading was worse still: it flipped the entire river the moment the
+  // hero's height crossed a quarter-wave, which is exactly what mobile browser
+  // chrome does as it collapses on the first scroll.
+  //
+  // So carry the seam's own curve across the join and ease into the meander.
+  // Smoothstep is flat at t = 0, so the slope there is purely the seam's, and
+  // nothing in here steps as the hero's height changes.
+  const seamH = hero.clientHeight;
+  const startX = width * 0.5 + waveOffset(seamH);
 
-  const centerX = (t) =>
-    startX +
-    heading *
-      (RIVER_AMP * Math.sin((t / RIVER_WAVE) * Math.PI * 2) +
-        RIVER_AMP_2 * Math.sin((t / RIVER_WAVE_2) * Math.PI * 2));
+  const seamTail = (t) => waveOffset(seamH + t) - waveOffset(seamH);
+  const meander = (t) =>
+    RIVER_AMP * Math.sin((t / RIVER_WAVE) * Math.PI * 2) +
+    RIVER_AMP_2 * Math.sin((t / RIVER_WAVE_2) * Math.PI * 2);
+
+  const centerX = (t) => {
+    const u = Math.min(1, t / RIVER_BLEND);
+    const k = u * u * (3 - 2 * u);
+    return startX + (1 - k) * seamTail(t) + k * meander(t);
+  };
   const halfWidth = (t) =>
     RIVER_TAIL + (RIVER_HEAD - RIVER_TAIL) * Math.exp(-t / RIVER_TAPER);
 
@@ -156,23 +184,72 @@ function buildFlowLine() {
   flowLine.style.height = `${height}px`;
   flowLine.setAttribute('viewBox', `0 0 ${width} ${height}`);
   flowLinePath.setAttribute('d', `M${right.join('L')}L${left.join('L')}Z`);
-  revealFlowLine();
-}
 
-// Drawn in to a little short of the fold, so the tip stays just ahead of the
-// reader instead of being pinned to the bottom edge of the window. This is all
-// that runs on scroll — one clip-path string, no geometry, no measuring.
-function revealFlowLine() {
-  const height = parseFloat(flowLine.style.height);
-  if (!height) return;
   if (reduceMotion) {
     flowLine.style.clipPath = 'none';
     return;
   }
+
+  // The geometry just moved, so whatever was last written no longer describes it
+  lastClip = '';
+
+  if (scrollTimeline && !handDrawing) {
+    // The keyframes live in style.css; all that's needed here is the stretch of
+    // page scroll they map onto. Lengths on a scroll timeline are scroll
+    // offsets, so these are literally the same two positions the hand-rolled
+    // version solves for: tip at the line's head, and tip at its tail.
+    const lead = window.innerHeight * RIVER_LEAD;
+    flowLine.style.setProperty(
+      'animation-range',
+      `${(top - lead).toFixed(1)}px ${(top + height - lead).toFixed(1)}px`,
+    );
+  } else {
+    // Supported-but-not-running counts as by hand too, or a resize would leave
+    // the clip describing the old geometry until the next scroll.
+    revealFlowLine();
+  }
+}
+
+// Fallback for browsers without scroll-driven animations. One clip-path string
+// per frame, no geometry and no measuring — and it skips the write when the
+// value hasn't actually changed, which is most frames of a slow scroll.
+let lastClip = '';
+
+function revealFlowLine() {
+  const height = parseFloat(flowLine.style.height);
+  if (!height || reduceMotion) return;
   const top = parseFloat(flowLine.style.top) || 0;
-  const drawn = window.scrollY + window.innerHeight * 0.92 - top;
+  const drawn = window.scrollY + window.innerHeight * RIVER_LEAD - top;
   const pct = Math.min(100, Math.max(0, (drawn / height) * 100));
-  flowLine.style.clipPath = `inset(0 0 ${(100 - pct).toFixed(2)}% 0)`;
+  const next = `inset(0 0 ${(100 - pct).toFixed(2)}% 0)`;
+  if (next === lastClip) return;
+  lastClip = next;
+  flowLine.style.clipPath = next;
+}
+
+let handDrawing = false;
+
+function drawLineByHand() {
+  if (handDrawing || reduceMotion) return;
+  handDrawing = true;
+  // Drop the declared animation first. A running animation outranks inline
+  // styles, so leaving it in place would beat every clip-path written below.
+  flowLine.style.animation = 'none';
+  revealFlowLine();
+
+  let pending = false;
+  window.addEventListener(
+    'scroll',
+    () => {
+      if (pending) return;
+      pending = true;
+      requestAnimationFrame(() => {
+        revealFlowLine();
+        pending = false;
+      });
+    },
+    { passive: true },
+  );
 }
 
 if (flowLine && flowLinePath && hero) {
@@ -188,20 +265,88 @@ if (flowLine && flowLinePath && hero) {
     pendingLine = setTimeout(buildFlowLine, 100);
   });
 
-  let linePending = false;
-  window.addEventListener(
-    'scroll',
-    () => {
-      if (linePending) return;
-      linePending = true;
-      requestAnimationFrame(() => {
-        revealFlowLine();
-        linePending = false;
-      });
-    },
-    { passive: true },
-  );
+  if (!scrollTimeline) {
+    drawLineByHand();
+  } else {
+    // Supporting the syntax and actually running it are different things: a
+    // scroll timeline whose scroller never resolves sits inactive, applies no
+    // keyframes at all, and the line would silently stay fully drawn. Check it
+    // is really ticking once the page has settled, and take over by hand if not.
+    window.addEventListener('load', () => {
+      if (reduceMotion) return;
+      const anim = flowLine.getAnimations && flowLine.getAnimations()[0];
+      const ticking = anim && anim.timeline && anim.timeline.currentTime !== null;
+      if (!ticking) drawLineByHand();
+    });
+  }
 }
+
+// --- Contact form ----------------------------------------------------------
+//
+// The site is static, so there is nothing to POST to. Submitting composes the
+// message and hands it to the visitor's own mail client — they still press send
+// themselves, and nothing leaves the page on its own.
+
+(function () {
+  const form = document.getElementById('contactForm');
+  if (!form) return;
+  const note = document.getElementById('contactNote');
+  const name = document.getElementById('cfName');
+  const email = document.getElementById('cfEmail');
+  const company = document.getElementById('cfCompany');
+  const message = document.getElementById('cfMessage');
+
+  const setNote = (text, state) => {
+    if (!note) return;
+    note.textContent = text;
+    note.className = 'contact-note' + (state ? ' is-' + state : '');
+  };
+
+  // Marked only once the visitor has actually tried to send, so an untouched
+  // form is never sitting there red.
+  const flag = (field, bad) => field.classList.toggle('is-error', bad);
+
+  // Deliberately loose: anything with a name, an @ and a dot after it. A strict
+  // pattern here only ever rejects addresses that turn out to be real.
+  const emailLooksReal = (v) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim());
+
+  form.addEventListener('submit', (event) => {
+    event.preventDefault();
+
+    const noName = !name.value.trim();
+    const badEmail = !emailLooksReal(email.value);
+    flag(name, noName);
+    flag(email, badEmail);
+
+    if (noName || badEmail) {
+      setNote(noName ? 'Укажите имя и рабочий email.' : 'Проверьте email.', 'error');
+      (noName ? name : email).focus();
+      return;
+    }
+
+    const lines = [
+      `Имя: ${name.value.trim()}`,
+      `Email: ${email.value.trim()}`,
+      company.value.trim() ? `Компания: ${company.value.trim()}` : null,
+      '',
+      message.value.trim() || '(без сообщения)',
+    ].filter((line) => line !== null);
+
+    const subject = `Запрос демо Flott — ${name.value.trim()}`;
+    window.location.href =
+      'mailto:info@flott.uz?subject=' + encodeURIComponent(subject) +
+      '&body=' + encodeURIComponent(lines.join('\n'));
+
+    setNote('Открываем почту — письмо уже заполнено, осталось отправить.', 'ok');
+  });
+
+  // Clear the red as soon as they start correcting it
+  [name, email].forEach((field) => {
+    field.addEventListener('input', () => {
+      if (field.classList.contains('is-error')) flag(field, false);
+    });
+  });
+})();
 
 // The navbar unfolds from a thin center line while the hero staggers in
 // alongside it — choreographed with CSS animation-delays in style.css.
