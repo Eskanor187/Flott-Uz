@@ -98,16 +98,17 @@ ease-out/expo (never ease-in); only `transform` + `opacity` animated on the GPU;
 | Component | Where | Notes |
 | --- | --- | --- |
 | Floating pill **navbar** | `.navbar` | glass, unfolds on load, solidifies on scroll, mobile burger→X + drop-down menu |
-| **Hero** (ice / water split) | `.ihero` | `ice.png` still and looping `water_flow.mp4`, hard cut down a swelling seam (canvas mask + SVG rule, both from one wave function in `script.js`); frozen invoice `.panel` left, «Доступно сегодня» right |
+| **Hero** (ice / water split) | `.ihero` | two looping clips, `ice.mp4` + `water_flow.mp4` (both 1280×720, one shared fit rule so they crop identically; `ice.png` stays as the poster/fallback), hard cut down a swelling seam (canvas mask + SVG rule, both from one wave function in `script.js`) |
+| **Hero money blocks** | `.ihero-cards` | frozen invoice + «Доступно сегодня». Overlaid on the hero above 980px (one either side of the seam), following it down the page below that |
 | Trust **marquee** | `.marquee` | infinite partner/registration ticker |
-| **Flott AI** cards | `.ai-grid`, `.ai-card`, `.ai-demo` | typewriter demo bubbles → open chat dialog |
+| **Flott AI** cards | `.section-ai`, `.ai-grid`, `.ai-card`, `.ai-demo` | section is one blue card over `ai-hands.jpg` (the reaching-hands render); the two panels are glass (`backdrop-filter`) so the image carries through them; typewriter demo bubbles → open chat dialog |
 | **AI chat dialog** | `<dialog class="ai-dialog">` | FLIP open, flying avatar, shrink-back close, typing sequence |
-| **How it works** merge scene | `#mergeScene` | scroll-driven SVG "wires" merging three parties → six steps |
+| **How it works** merge scene | `#mergeScene` | scroll-driven SVG "wires" merging three parties → six steps; each role card carries its 3D glass render (`role-bank/supplier/buyer.png`) |
 | **Cabinet** demo | `.cab`, `#cabNav` | interactive dashboard, tab-switch with re-render animation |
 | **Feature rows** (01/02/03) | `.feature-row` | bank card-deck (swap + tilt), client & underwriter panels (tilt) |
-| **Live / traction** | `.live-grid`, `.pipeline` | result cards + deal-cycle pipeline |
+| **Live / traction** | `.live-grid`, `.pipeline`, `.backing` | result cards, deal-cycle pipeline, and the two investment announcements (AloqaVentures / United Ventures) with the amounts set as text rather than left inside the JPEGs |
 | **Security** certs | `.cert-grid`, `.cert-card` | registration/audit cards |
-| **CTA** | `.cta` | magnetic primary button |
+| **CTA** contact form | `.contact-card` | 4-field form on the left, blue panel on the right (closing line + the `hourglass.png` render, which overhangs the panel's right and bottom edges rather than being sized to fit); static site, so submit composes a `mailto:` for the visitor's own client |
 | **Footer** | `.site-footer` | brand + link columns |
 
 ---

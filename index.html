@@ -12,8 +12,15 @@
 </head>
 <body>
 <header class="navbar" id="navbar">
-    <a class="nav-logo" href="#">
-      <span class="logo-badge">f</span>
+    <!-- aria-label because the wordmark is hidden under 365px, which would
+         otherwise leave this link with no accessible name at all. -->
+    <a class="nav-logo" href="#" aria-label="Flott — на главную">
+      <span class="logo-badge">
+        <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true">
+          <path d="M20.5 5c-3.8 0-5.2 2.3-5.2 5.8v9.6c0 2.8-1.1 4.7-3.8 5.3" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round"/>
+          <path d="M9 13.2h14M9 19h10.5" stroke="currentColor" stroke-width="3.2" stroke-linecap="round"/>
+        </svg>
+      </span>
       <span class="logo-wordmark">flott</span>
     </a>
 
@@ -42,7 +49,8 @@
      being two different bits of markup. -->
 <div class="hero-wrap">
 <section class="ihero" id="hero">
-      <div class="ihero-ice" aria-hidden="true"></div>
+      <video class="ihero-ice" id="ihero-ice" src="ice.mp4"
+             autoplay loop muted playsinline preload="auto" aria-hidden="true"></video>
 
       <!-- The water plays underneath the whole viewport; a canvas mask painted
            in script.js decides where it shows through the ice. -->
@@ -71,7 +79,7 @@
 
       <div class="ihero-head" id="hero-text">
         <h1 class="ihero-h1">
-          <span class="line ihero-serif">Время нельзя</span>
+          <span class="line serif-accent ihero-serif">Время нельзя</span>
           <span class="line">терять впустую</span>
         </h1>
       </div>
@@ -148,10 +156,15 @@
   </div>
 </section>
 
-<!-- ===== Flott AI ===== -->
-<section class="section" id="ai">
+<!-- ===== Flott AI =====
+     The whole section is one blue card over the reaching-hands render; the two
+     panels inside are glass so the image carries through them. -->
+<section class="section section-ai" id="ai">
+  <!-- Positioned by script.js so the Flott mark lands dead centre of the card;
+       the CSS below is the sensible cover-and-centre it starts from. -->
+  <img class="ai-bg" src="ai-hands.jpg" alt="" aria-hidden="true">
   <div class="container">
-    <p class="eyebrow reveal">Flott AI</p>
+    <p class="eyebrow eyebrow-light reveal">Flott AI</p>
     <h2 class="reveal d1">Искусственный интеллект<br>внутри каждой сделки.</h2>
     <p class="section-sub reveal d2">Flott читает денежные потоки и&nbsp;счета-фактуры —
       и&nbsp;подсказывает каждой стороне следующий шаг.</p>
@@ -216,26 +229,25 @@
             <path class="wire-flow"></path>
             <path class="wire-flow"></path>
           </svg>
+          <!-- Decorative: each render just restates the heading beside it, so
+               it stays out of the accessibility tree. -->
           <div class="merge-card mc-top">
-            <div class="role-ic">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M4 18h16M6 18v-7M10 18v-7M14 18v-7M18 18v-7M3 8l9-5 9 5z"/></svg>
-            </div>
             <h3>Банк-фактор</h3>
             <p>Финансирует сделки, видит риск и&nbsp;портфель целиком.</p>
+            <img class="role-pic" src="role-bank.png" alt="" aria-hidden="true"
+              width="223" height="256" loading="lazy" decoding="async">
           </div>
           <div class="merge-card mc-left">
-            <div class="role-ic">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6M9 13h6M9 17h6"/></svg>
-            </div>
             <h3>Поставщики</h3>
             <p>Превращают неоплаченные счета в&nbsp;деньги сегодня.</p>
+            <img class="role-pic" src="role-supplier.png" alt="" aria-hidden="true"
+              width="256" height="255" loading="lazy" decoding="async">
           </div>
           <div class="merge-card mc-right">
-            <div class="role-ic">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
-            </div>
             <h3>Покупатели</h3>
             <p>Сохраняют отсрочку, подтверждают сделки в&nbsp;два клика.</p>
+            <img class="role-pic" src="role-buyer.png" alt="" aria-hidden="true"
+              width="241" height="256" loading="lazy" decoding="async">
           </div>
           <div class="merge-center">
             <div class="merge-logo">
@@ -572,6 +584,37 @@
         <span class="pipe">Отчёты<small>ЦБ, банк</small></span>
       </div>
     </div>
+
+    <!-- Инвестиции. Суммы вынесены в текст, а не оставлены внутри картинок:
+         на снимках они набраны по-узбекски, и в JPEG их не прочитает ни поиск,
+         ни скринридер. -->
+    <div class="backing">
+      <p class="backing-kicker reveal">Инвестиции</p>
+      <div class="backing-grid">
+        <a class="backing-card reveal" href="https://t.me/aloqaventures/1443"
+          target="_blank" rel="noopener noreferrer">
+          <img class="backing-shot" src="aloqa_ventures.jpg"
+            alt="Команда Flott и фонда AloqaVentures после подписания инвестиции"
+            width="1024" height="1280" loading="lazy" decoding="async">
+          <div class="backing-body">
+            <p class="backing-sum">$50 000</p>
+            <h3>AloqaVentures</h3>
+            <p class="backing-note">Фонд проинвестировал Flott</p>
+          </div>
+        </a>
+        <a class="backing-card reveal d1" href="https://t.me/pivotuzbekistan/3165"
+          target="_blank" rel="noopener noreferrer">
+          <img class="backing-shot" src="united_ventures.jpg"
+            alt="Команда Flott и фонда United Ventures после подписания инвестиции"
+            width="1920" height="1280" loading="lazy" decoding="async">
+          <div class="backing-body">
+            <p class="backing-sum">$27 000</p>
+            <h3>United Ventures</h3>
+            <p class="backing-note">Инвестиции в финтех-стартап Flott</p>
+          </div>
+        </a>
+      </div>
+    </div>
   </div>
 </section>
 
@@ -621,34 +664,8 @@
   <div class="container">
     <div class="contact-card reveal">
 
-      <!-- Синяя панель — тот же довод, что и раньше, плюс контакты -->
-      <aside class="contact-info">
-        <h2 class="contact-title">Каждый день ожидания —<br>упущенная сделка.</h2>
-        <p class="contact-lead">Подключите Flott — пилотный период бесплатно.</p>
-
-        <ul class="contact-list">
-          <li>
-            <span class="contact-ic" aria-hidden="true">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
-            </span>
-            <a href="mailto:info@flott.uz">info@flott.uz</a>
-          </li>
-          <li>
-            <span class="contact-ic" aria-hidden="true">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20M2 12h20"/></svg>
-            </span>
-            <a href="https://flott.uz">flott.uz</a>
-          </li>
-          <li>
-            <span class="contact-ic" aria-hidden="true">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/></svg>
-            </span>
-            <span>Ташкент, Узбекистан</span>
-          </li>
-        </ul>
-      </aside>
-
-      <!-- Статический сайт: отправка открывает почтовый клиент, см. script.js -->
+      <!-- Форма слева. Статический сайт: отправка открывает почтовый клиент,
+           см. script.js -->
       <form class="contact-form" id="contactForm" novalidate>
         <div class="field">
           <label for="cfName">Ваше имя</label>
@@ -678,6 +695,18 @@
           <p class="contact-note" id="contactNote" role="status"></p>
         </div>
       </form>
+
+      <!-- Синяя панель справа — тот же довод, контакты и песочные часы -->
+      <aside class="contact-info">
+        <h2 class="contact-title">Каждый день ожидания —<br><span class="serif-accent">упущенная сделка.</span></h2>
+        <p class="contact-lead">Подключите Flott — пилотный период бесплатно.</p>
+
+        <!-- Decorative — the copy above it already makes the point about
+             waiting, so it stays out of the accessibility tree. It runs past
+             the panel's right and bottom edges on purpose. -->
+        <img class="contact-visual" src="hourglass.png" alt="" aria-hidden="true"
+          width="390" height="420" loading="lazy" decoding="async">
+      </aside>
 
     </div>
   </div>

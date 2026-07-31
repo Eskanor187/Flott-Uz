@@ -17,7 +17,18 @@ const LOGO_SIZE = 92;
 // between the still image and the video shows past the rule's edges.
 const SEAM_W = LOGO_SIZE / 2;
 
-const waveOffset = (y) => WAVE_AMPLITUDE * Math.sin((y / WAVE_LENGTH) * Math.PI * 2);
+// The badge — and the tagline locked up under it — sit at the seam's midpoint.
+// Running the wave from y = 0 left the seam wherever the swell happened to be at
+// that height (12px left of centre on a 375×812 phone), which threw the whole
+// lockup off to one side. Anchoring the wave's zero crossing at the hero's
+// mid-height means the seam is dead centre exactly where the badge sits, so the
+// lockup is centred and still genuinely on the line rather than pinned beside it.
+//
+// Read from the hero on every call rather than cached, so buildFlowLine can't
+// pick up a stale phase if it happens to run before a repaint.
+const waveOffset = (y) =>
+  WAVE_AMPLITUDE *
+  Math.sin(((y - hero.clientHeight / 2) / WAVE_LENGTH) * Math.PI * 2);
 
 const navbar = document.getElementById('navbar');
 const burger = document.getElementById('nav-burger');
@@ -96,6 +107,19 @@ if (hero && heroWater) {
   window.addEventListener('resize', () => {
     clearTimeout(pendingPaint);
     pendingPaint = setTimeout(paintHero, 100);
+  });
+}
+
+// Both halves of the hero are now looping video. Under reduced motion hold each
+// on a frame rather than stopping them dead — they still have to be rendered
+// frames, or the hero goes blank.
+if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+  [heroWater, document.getElementById('ihero-ice')].forEach((clip) => {
+    if (!clip) return;
+    const hold = () => clip.pause();
+    clip.addEventListener('loadeddata', hold);
+    clip.addEventListener('play', hold);
+    hold();
   });
 }
 
@@ -280,6 +304,72 @@ if (flowLine && flowLinePath && hero) {
     });
   }
 }
+
+// --- Flott AI: put the mark on the centre of the card -----------------------
+//
+// The Flott mark is not at the centre of its own render — measured off the
+// image, its glow is centred at 47.3% across and 56.3% down. `background-size:
+// cover` on a card this shape is height-constrained, so there is no vertical
+// slack for background-position to take up and the mark always sits low. So the
+// render is an <img> and gets sized and offset here instead.
+
+const AI_BG_MARK_X = 0.473; // where the mark sits within the render
+const AI_BG_MARK_Y = 0.563;
+
+// On a phone the card is ~350×1650 — filling that while keeping the mark
+// centred would blow a 1672px render up past 2×, leaving a soft 10% strip with
+// both hands cropped away. Past this zoom the image stops trying to cover and
+// sits as a band at the top instead, fading into the card (see .ai-bg-fade).
+const AI_BG_MAX_ZOOM = 1.35;
+
+(function () {
+  const section = document.querySelector('.section-ai');
+  const bg = section && section.querySelector('.ai-bg');
+  if (!section || !bg) return;
+
+  function placeMark() {
+    const w = bg.naturalWidth;
+    const h = bg.naturalHeight;
+    const sw = section.clientWidth;
+    const sh = section.clientHeight;
+    if (!w || !h || !sw || !sh) return;
+
+    const markX = w * AI_BG_MARK_X;
+    const markY = h * AI_BG_MARK_Y;
+
+    // Centring the mark means the image hangs further off one side than the
+    // other, so plain `cover` would no longer reach the opposite edge. Take the
+    // scale that satisfies whichever of the four edges is hungriest — that is
+    // the smallest zoom which both centres the mark and still fills the card.
+    const needed = Math.max(
+      sw / (2 * markX),
+      sw / (2 * (w - markX)),
+      sh / (2 * markY),
+      sh / (2 * (h - markY)),
+    );
+    const capped = needed > AI_BG_MAX_ZOOM;
+    const scale = capped ? AI_BG_MAX_ZOOM : needed;
+
+    bg.style.width = `${(w * scale).toFixed(1)}px`;
+    bg.style.height = `${(h * scale).toFixed(1)}px`;
+    bg.style.left = `${(sw / 2 - markX * scale).toFixed(1)}px`;
+    // Capped, the image can no longer reach the bottom of a tall card, so it
+    // hangs from the top and the fade hands over to the card's own blue. The
+    // mark stays centred across, which is the part you actually read.
+    bg.style.top = capped ? '0px' : `${(sh / 2 - markY * scale).toFixed(1)}px`;
+    bg.classList.toggle('ai-bg-fade', capped);
+  }
+
+  if (bg.complete) placeMark();
+  bg.addEventListener('load', placeMark);
+  window.addEventListener('load', placeMark);
+
+  let pendingMark;
+  window.addEventListener('resize', () => {
+    clearTimeout(pendingMark);
+    pendingMark = setTimeout(placeMark, 100);
+  });
+})();
 
 // --- Contact form ----------------------------------------------------------
 //

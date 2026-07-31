@@ -531,6 +531,84 @@ h3 {
 
 /* ---------- Flott AI ---------- */
 
+/* The section is a single blue card laid over the reaching-hands render.
+
+   The mark sits dead centre of that image, so the background is centred and the
+   overlay is a vignette rather than a sweep: clear in the middle so the logo
+   and the two hands reaching for it read, closing down towards the edges where
+   the headline and the panels need a dark ground to sit on. */
+.section-ai {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  color: var(--white);
+  border-radius: clamp(28px, 4vw, 48px);
+  width: min(1400px, 100% - 24px);
+  margin-inline: auto;
+  background-color: #0d3fbe;
+}
+
+/* The render, as an element rather than a background, because the mark is not
+   at the centre of its own image — it sits at 47.3% / 56.3%. Under `cover` the
+   card is height-constrained, which leaves zero vertical freedom, so no
+   background-position could ever pull the mark onto the centre. script.js sizes
+   and offsets this instead. These declarations are the starting point, and what
+   you get if the script never runs. */
+.ai-bg {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: -2;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  pointer-events: none;
+}
+
+/* Set by script.js when the render is too small to fill a tall card at a
+   sensible zoom: it hangs from the top and dissolves into the card's own blue
+   rather than ending on a hard edge. */
+.ai-bg-fade {
+  -webkit-mask-image: linear-gradient(180deg, #000 52%, transparent 96%);
+  mask-image: linear-gradient(180deg, #000 52%, transparent 96%);
+}
+
+/* Vignette over the render: clear in the middle so the mark and the two hands
+   reaching for it read, closing down towards the edges where the headline and
+   the panels need a dark ground. */
+.section-ai::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: radial-gradient(
+    78% 74% at 50% 50%,
+    rgba(9, 44, 152, 0.22) 0%,
+    rgba(9, 42, 146, 0.55) 42%,
+    rgba(8, 34, 124, 0.86) 74%,
+    rgba(6, 26, 102, 0.95) 100%
+  );
+}
+
+/* A little extra depth in the corners, the way the render falls off */
+.section-ai::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(52% 60% at 4% 8%, rgba(255, 255, 255, 0.08), transparent 70%),
+    radial-gradient(60% 70% at 96% 96%, rgba(4, 20, 74, 0.42), transparent 72%);
+}
+
+/* …and the content sits above it */
+.section-ai > .container { position: relative; z-index: 1; }
+
+.section-ai .section-sub { color: var(--blue-text-on); }
+
 .ai-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -563,6 +641,84 @@ h3 {
 }
 
 .ai-card-dark > p { color: rgba(255, 255, 255, 0.66); }
+
+/* Glass, so the render carries through the panels rather than being boxed out
+   of them. Both panels are the same here — the light/dark pairing only made
+   sense when they sat on a white page. */
+.section-ai .ai-card,
+.section-ai .ai-card-dark {
+  /* Not a flat wash: glass is brighter where it turns towards the light, so the
+     fill falls off across the panel and the top edge carries a specular line
+     while the bottom only catches a little bounce. The saturate() is what stops
+     the blurred render going grey underneath. */
+  background: linear-gradient(
+    158deg,
+    rgba(255, 255, 255, 0.17) 0%,
+    rgba(255, 255, 255, 0.07) 48%,
+    rgba(255, 255, 255, 0.11) 100%
+  );
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: clamp(20px, 2.2vw, 28px);
+  color: var(--white);
+  -webkit-backdrop-filter: blur(22px) saturate(1.4);
+  backdrop-filter: blur(22px) saturate(1.4);
+  box-shadow:
+    0 30px 70px -34px rgba(4, 20, 74, 0.7),
+    inset 0 1px 0 rgba(255, 255, 255, 0.42),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.10);
+}
+
+/* The right-hand panel sits over the darker side of the render, so it takes a
+   heavier pour of white to read as the same material. Must come after the
+   shared rule above — same specificity, so source order decides. */
+.section-ai .ai-card-dark {
+  background: linear-gradient(
+    158deg,
+    rgba(255, 255, 255, 0.27) 0%,
+    rgba(255, 255, 255, 0.15) 48%,
+    rgba(255, 255, 255, 0.20) 100%
+  );
+  border-color: rgba(255, 255, 255, 0.32);
+  box-shadow:
+    0 30px 70px -34px rgba(4, 20, 74, 0.7),
+    inset 0 1px 0 rgba(255, 255, 255, 0.55),
+    inset 0 -1px 0 rgba(255, 255, 255, 0.14);
+}
+
+.section-ai .ai-card > p,
+.section-ai .ai-card-dark > p { color: rgba(255, 255, 255, 0.74); }
+
+/* Both card selectors spelled out: `.ai-card-dark .ai-tag` ties on specificity
+   and sits later in the file, so a bare `.section-ai .ai-tag` loses on it and
+   the two panels end up with different tag fills. */
+.section-ai .ai-card .ai-tag,
+.section-ai .ai-card-dark .ai-tag {
+  background: rgba(255, 255, 255, 0.16);
+  color: var(--white);
+}
+
+.section-ai .ai-list li::before { color: #9dc0ff; }
+
+/* Both bubbles go white against the glass. :hover is spelled out because
+   `.ai-demo-dark:hover` carries the same specificity as a two-class override
+   and sits further down the file, so it would otherwise win the tie. */
+.section-ai .ai-demo,
+.section-ai .ai-demo-dark,
+.section-ai .ai-demo-dark:hover {
+  background: var(--white);
+  border: none;
+  box-shadow: 0 18px 40px -18px rgba(4, 20, 74, 0.6);
+}
+
+.section-ai .ai-demo p { color: var(--black); }
+
+.section-ai .ai-demo::before,
+.section-ai .ai-demo-dark::before { border-right-color: var(--white); }
+
+/* The unread dot needs a ring that reads against glass rather than against a
+   flat card colour */
+.section-ai .ai-demo::after,
+.section-ai .ai-demo-dark::after { border-color: rgba(255, 255, 255, 0.85); }
 
 .ai-tag {
   align-self: flex-start;
@@ -1315,47 +1471,62 @@ h3 {
   to { stroke-dashoffset: -22; }
 }
 
+/* Matched to the design file. In there the card is a rounded rect masking a
+   slice of the hands render with a big white soft-light circle over it — but
+   sampling the rendered result, all that resolves to a smooth pale blue
+   (#dce9fc → #e1ebfd, deepening to about #a8c4f6 at the right edge), with no
+   readable structure left. Gradients reproduce it exactly and cost nothing,
+   where masking an 84KB photo into each of three cards would not.
+
+   Proportions are taken off the design's 416×453 card: radius and padding are
+   both ~7.7% of the width. */
 .merge-card {
   position: absolute;
   z-index: 1;
   width: var(--mcw);
-  background: var(--white);
-  border-radius: var(--r-md);
-  padding: 20px;
+  background:
+    radial-gradient(112% 82% at 100% 12%, rgba(118, 158, 234, 0.42), transparent 58%),
+    linear-gradient(180deg, #dce9fc 0%, #e1ebfd 42%, #cfdefb 100%);
+  border-radius: 22px;
+  padding: 22px 22px 0;
   display: flex;
   flex-direction: column;
   gap: 8px;
-  box-shadow: 0 18px 44px -18px rgba(18, 48, 158, 0.18);
   will-change: transform, opacity;
 }
 
-.merge-card h3 { font-size: 1.05rem; }
+.merge-card h3 { font-size: 1.08rem; color: var(--blue); }
 
-.merge-card p { color: var(--ink-60); font-size: 0.88rem; }
+/* #0a3599 straight off the design — a navy, where the rest of the page uses a
+   neutral grey for body copy. */
+.merge-card p { color: #0a3599; font-size: 0.88rem; }
 
-.mc-top { top: 0; left: calc(50% - var(--mcw) / 2); }
+/* All three sit in a row beneath the mark, as in the design file. The class is
+   still called mc-top because it is the first card in the DOM and the wire
+   indices in script.js follow that order — it is no longer the top one. */
+.mc-top { left: calc(50% - var(--mcw) / 2); bottom: 5%; }
 .mc-left { left: 0; bottom: 5%; }
 .mc-right { right: 0; bottom: 5%; }
 
-.role-ic {
-  width: 42px;
-  height: 42px;
-  border-radius: 13px;
-  background: var(--tint-chip);
-  color: var(--blue-ink);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 4px;
+/* In the design the render is ~80% of the card's width and deliberately hangs
+   past its bottom edge — about a quarter of the card's height sticks out below.
+   The negative margin is a percentage, which resolves against the card's WIDTH,
+   so -26% ≈ the 111px overhang the design has on a 416px card. */
+.role-pic {
+  width: 80%;
+  height: auto;
+  align-self: center;
+  margin: 6px auto -26%;
+  /* Lit from above, so a soft contact shadow sits it on the card. */
+  filter: drop-shadow(0 12px 16px rgba(18, 48, 158, 0.24));
 }
-
-.role-ic svg { width: 22px; height: 22px; }
 
 .merge-center {
   position: absolute;
   z-index: 2;
   left: 50%;
-  top: 54%;
+  /* Sits above the row of three now, not in the middle of a triangle */
+  top: 22%;
   transform: translate(-50%, -50%);
   display: flex;
   flex-direction: column;
@@ -1478,6 +1649,11 @@ h3 {
 }
 .merge-scene.static .wires { display: none; }
 .merge-scene.static .merge-card { position: static; width: 100%; }
+
+/* Stacked, the cards are in normal flow, so a render hanging past the bottom
+   edge would land on the card below it. Here it stays inside. */
+.merge-scene.static .merge-card { padding-bottom: 22px; }
+.merge-scene.static .role-pic { width: 62%; margin-bottom: 0; }
 .merge-scene.static .merge-center {
   position: static;
   transform: none !important;
@@ -1818,6 +1994,75 @@ h3 {
   padding: clamp(24px, 4vw, 40px);
 }
 
+/* ---------- Инвестиции ---------- */
+
+.backing { margin-top: 56px; }
+
+.backing-kicker {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #8fadff;
+  margin-bottom: 24px;
+}
+
+.backing-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.backing-card {
+  display: flex;
+  flex-direction: column;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  border-radius: var(--r-md);
+  overflow: hidden;
+  transition: transform 0.45s var(--ease), background 0.45s var(--ease);
+}
+
+.backing-card:hover { transform: translateY(-6px); background: rgba(255, 255, 255, 0.08); }
+
+/* The two shots are different shapes — one portrait, one landscape — so they
+   run through a fixed frame rather than at their own ratios, or the pair sits
+   at wildly different heights. */
+.backing-shot {
+  display: block;
+  width: 100%;
+  /* height: auto is load-bearing — the width/height attributes on the <img>
+     are presentational hints that set CSS height, which would otherwise win
+     over aspect-ratio and render each shot at its full intrinsic height. */
+  height: auto;
+  aspect-ratio: 16 / 10;
+  object-fit: cover;
+  object-position: center;
+}
+
+.backing-body {
+  padding: 26px 30px 30px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.backing-sum {
+  font-size: clamp(1.9rem, 3vw, 2.5rem);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  color: var(--white);
+}
+
+.backing-card h3 { font-size: 1.15rem; color: #8fadff; }
+
+.backing-note { color: rgba(255, 255, 255, 0.66); font-size: 0.95rem; }
+
+/* Keyboard focus needs a marker on the dark ground — the cards are anchors */
+.backing-card:focus-visible {
+  outline: 2px solid #8fadff;
+  outline-offset: 3px;
+}
+
 .pipeline-title {
   font-size: 0.95rem;
   font-weight: 600;
@@ -1911,7 +2156,8 @@ h3 {
 
 .contact-card {
   display: grid;
-  grid-template-columns: minmax(0, 0.82fr) minmax(0, 1.18fr);
+  /* Form first and wider, blue panel second — it carries the hourglass now */
+  grid-template-columns: minmax(0, 1.12fr) minmax(0, 0.88fr);
   gap: clamp(24px, 3.4vw, 48px);
   align-items: start;
   background: var(--white);
@@ -1925,10 +2171,14 @@ h3 {
 
 /* Синяя панель — довод и контакты */
 
+/* No overflow: hidden — the hourglass is meant to break out of this panel, the
+   way it hangs off the card in the design file. The ::before takes the corner
+   radius itself instead, which is the only thing the clip was doing. */
 .contact-info {
   position: relative;
-  overflow: hidden;
   align-self: stretch;
+  display: flex;
+  flex-direction: column;
   background: var(--blue);
   color: var(--white);
   border-radius: var(--r-md);
@@ -1939,6 +2189,7 @@ h3 {
   content: "";
   position: absolute;
   inset: 0;
+  border-radius: inherit;
   pointer-events: none;
   background:
     radial-gradient(46% 60% at 88% 6%, rgba(255, 255, 255, 0.16), transparent 70%),
@@ -1959,36 +2210,24 @@ h3 {
   font-size: 1rem;
 }
 
-.contact-list {
-  display: flex;
-  flex-direction: column;
-  gap: 22px;
-  margin-top: clamp(28px, 3.4vw, 44px);
+/* Hangs off the panel's right and bottom corner rather than being made to fit
+   inside it — in the design the hourglass overruns the card on three sides, and
+   nothing is resized to accommodate it. The negative margins are what let the
+   panel stay the height of its copy while the render carries on past the edge. */
+.contact-visual {
+  display: block;
+  width: min(360px, 96%);
+  height: auto;
+  margin-top: clamp(14px, 2vw, 24px);
+  margin-left: auto;
+  /* Percentages resolve against the panel's content width, so these have to
+     clear its padding before anything actually shows outside. Tuned to the
+     design's overhang: ~3.5% of the panel's width off the right, ~20% of its
+     height off the bottom. */
+  margin-right: -14%;
+  margin-bottom: -27%;
+  filter: drop-shadow(0 20px 30px rgba(4, 20, 74, 0.34));
 }
-
-.contact-list li {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  font-weight: 600;
-  letter-spacing: -0.01em;
-  min-width: 0;
-}
-
-.contact-list a { word-break: break-word; }
-
-.contact-ic {
-  flex: 0 0 auto;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 40px;
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.14);
-}
-
-.contact-ic svg { width: 20px; height: 20px; }
 
 /* Форма */
 
@@ -2162,8 +2401,15 @@ h3 {
   .stat-grid { grid-template-columns: repeat(3, 1fr); }
   .chip-2 { left: -6px; }
 
-  /* Синяя панель встаёт над формой */
+  /* Стопкой синяя панель идёт первой: форма стоит в разметке раньше (слева на
+     широком экране), но открывать раздел голой формой, без довода над ней, —
+     плохо. order возвращает панель наверх. */
   .contact-card { grid-template-columns: minmax(0, 1fr); }
+  .contact-info { order: -1; }
+
+  /* Стопкой панель стоит прямо над формой, поэтому свес должен уместиться в
+     зазор сетки — иначе песочные часы ложатся на подпись первого поля. */
+  .contact-visual { margin-bottom: -16%; }
 
   /* Секции с карточками складываются раньше — чтобы не разъезжались и не были огромными.
 
@@ -2241,6 +2487,7 @@ h3 {
   .feature-row-flip .feature-visual { order: 2; }
 
   .live-grid { grid-template-columns: minmax(0, 1fr); }
+  .backing-grid { grid-template-columns: minmax(0, 1fr); }
 
   .ai-grid { grid-template-columns: minmax(0, 1fr); }
   .ai-demo { margin-left: 40px; }
@@ -2341,6 +2588,21 @@ h3 {
 
 @media (max-width: 640px) {
   .hero { padding-top: 140px; }
+
+  /* The card is far taller than it is wide here, so `cover` crops hard to the
+     sides and the two hands fall outside the frame — but the mark is centred,
+     so it survives the crop. Tighten the clear part of the vignette around it. */
+  .section-ai {
+    background-image:
+      radial-gradient(
+        86% 42% at 50% 50%,
+        rgba(9, 44, 152, 0.26) 0%,
+        rgba(9, 42, 146, 0.6) 44%,
+        rgba(8, 34, 124, 0.88) 76%,
+        rgba(6, 26, 102, 0.95) 100%
+      ),
+      url("ai-hands.jpg");
+  }
 
   /* Имя и Email тоже в одну колонку — вдвоём они здесь уже не читаются */
   .contact-form { grid-template-columns: minmax(0, 1fr); }
@@ -2500,12 +2762,19 @@ h3 {
   border-radius: 10px;
   background: #4C74F0;
   color: #fff;
-  font-weight: 800;
-  font-size: 20px;
   line-height: 1;
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+/* The real mark, not a typed "f" — same path the footer and the merge centre
+   use. Overrides the base .brand-mark, which is 30px and brand-blue: in here it
+   has to fit a 36px tile and read white on the badge's blue. */
+.logo-badge .brand-mark {
+  width: 24px;
+  height: 24px;
+  color: #fff;
 }
 
 .logo-wordmark {
@@ -2607,23 +2876,40 @@ h3 {
   letter-spacing: -0.02em;
 }
 
-.ihero-ice {
-  position: absolute;
-  inset: 0;
-  z-index: 1;
-  background: url("ice.png") center / cover no-repeat;
+.ihero {
+  --hero-video-zoom: 1;
 }
 
-/* mask-size is 100% of this box and the seam is painted in viewport
-   coordinates, so this must stay exactly viewport-sized. */
+/* Both halves are video, and both sources are 1280×720. One shared rule so they
+   can only ever crop identically — the ice was a 4:3 still before, which is
+   exactly why the water looked more zoomed than it did.
+
+   `cover` is the least zoom that still fills the hero: the hero is taller than
+   16:9 at every size (1.58 on a desktop, 0.46 on a phone), so anything smaller
+   leaves bands at the edges. --hero-video-zoom is the dial — 1 is cover, above
+   1 pushes in. */
+.ihero-ice,
 .ihero-water {
   position: absolute;
   inset: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
-  z-index: 3;
+  object-position: center;
+  transform: scale(var(--hero-video-zoom));
   pointer-events: none;
+}
+
+.ihero-ice {
+  z-index: 1;
+  /* Shows through while the video buffers, and if it can't play at all */
+  background: #9cc3e8 url("ice.png") center / cover no-repeat;
+}
+
+/* mask-size is 100% of this box and the seam is painted in viewport
+   coordinates, so this must stay exactly viewport-sized. */
+.ihero-water {
+  z-index: 3;
   -webkit-mask-size: 100% 100%;
   mask-size: 100% 100%;
 }
@@ -2690,9 +2976,16 @@ h3 {
 
 .ihero-h1 .line { display: block; }
 
-.ihero-serif {
+/* Playfair italic — the page's one display accent. Two places use it now: the
+   hero's first line and the closing line in the contact panel. Only the face
+   is shared; tracking stays with each, because the hero runs it at 40–96px
+   where it needs pulling in, and the contact heading at roughly half that. */
+.serif-accent {
   font-family: "Playfair Display", Georgia, serif;
   font-style: italic;
+}
+
+.ihero-serif {
   letter-spacing: -0.05em;
 }
 
