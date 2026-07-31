@@ -200,7 +200,9 @@ h3 {
   color: var(--black);
 }
 
-.brand-mark { width: 30px; height: 30px; color: var(--blue); }
+/* Официальный знак вертикальный (1013×1770) — высоту задаём, ширину
+   считает браузер, иначе знак сплющивается в квадрат */
+.brand-mark { width: auto; height: 30px; color: var(--blue); }
 
 .brand-word {
   font-size: 1.5rem;
@@ -1263,6 +1265,127 @@ h3 {
   justify-content: center;
 }
 
+/* Уведомления: та же панель, что в дашборде flott-website-main — 320px,
+   тёмный фон, рамка 1px, шапка и футер отделены линиями. */
+.cab-ic { position: relative; }
+
+/* Точка отсчёта для узких экранов: там панель шире расстояния от колокольчика
+   до края карточки, поэтому её растягивают по всей шапке (см. медиазапрос) */
+.cab-top { position: relative; }
+
+.cab-notifs {
+  position: absolute;
+  z-index: 5;
+  top: calc(100% + 8px);
+  right: 0;
+  width: min(320px, calc(100vw - 48px));
+  background: #0b1424;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 14px;
+  box-shadow: 0 30px 60px -20px rgba(0, 0, 0, 0.7);
+  text-align: left;
+  display: none;
+  opacity: 0;
+  transform: translateY(-8px);
+  transform-origin: top right;
+  /* Как у мобильного меню: display остаётся дискретным, едут opacity и
+     transform. Там, где @starting-style не поддержан, — мгновенный показ. */
+  transition: opacity 0.2s var(--ease), transform 0.2s var(--ease),
+    display 0.2s allow-discrete;
+}
+
+.cab-notifs.on {
+  display: block;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@starting-style {
+  .cab-notifs.on {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+}
+
+.cab-notifs-head {
+  padding: 14px 16px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Список короткий и фиксированный — высота по содержимому, без внутреннего
+   скролла; последняя граница не нужна, ниже уже линия футера */
+.cab-notifs-list { overflow: hidden; }
+
+.cab-notif:last-child { border-bottom: 0; }
+
+.cab-notif {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 13px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.cab-notif:hover { background: rgba(255, 255, 255, 0.05); }
+
+.cab-notif.unread { background: rgba(59, 130, 246, 0.06); }
+.cab-notif.unread:hover { background: rgba(59, 130, 246, 0.11); }
+
+/* Точка держит отступ и у прочитанных — иначе текст съезжает влево */
+.cab-notif-dot {
+  flex: 0 0 auto;
+  width: 7px;
+  height: 7px;
+  margin-top: 6px;
+  border-radius: 50%;
+  background: transparent;
+}
+
+.cab-notif.unread .cab-notif-dot { background: #3b82f6; }
+
+.cab-notif-body { min-width: 0; }
+
+.cab-notif-title {
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-bottom: 3px;
+}
+
+.cab-notif-msg {
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.55);
+  margin-bottom: 5px;
+}
+
+.cab-notif-time {
+  font-size: 0.72rem;
+  color: rgba(255, 255, 255, 0.38);
+}
+
+.cab-notifs-foot {
+  padding: 11px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.cab-notifs-all {
+  width: 100%;
+  padding: 4px;
+  background: none;
+  border: 0;
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: #60a5fa;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.cab-notifs-all:hover { color: #93c5fd; }
+
 .cab-body { display: flex; }
 
 .cab-side {
@@ -1353,6 +1476,73 @@ h3 {
   padding: 20px;
 }
 
+/* Карточка диаграммы — та же оболочка, что у списка. Сам SVG рисуется в
+   script.js по фактической ширине .cab-chart-body. */
+.cab-chart {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 14px;
+  padding: 20px;
+}
+
+.cab-chart + .cab-chart { margin-top: 14px; }
+
+.cab-chart-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+
+.cab-chart-title { font-size: 0.95rem; font-weight: 600; }
+
+.cab-legend {
+  display: flex;
+  gap: 14px;
+  font-size: 0.72rem;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.cab-leg { display: inline-flex; align-items: center; gap: 6px; }
+.cab-leg i { width: 8px; height: 8px; border-radius: 50%; }
+.cab-leg-in i { background: #10b981; }
+.cab-leg-out i { background: #ef4444; }
+.cab-leg-bal i { background: #3b82f6; }
+
+.cab-chart-body { position: relative; }
+.cab-chart-body svg { max-width: 100%; touch-action: pan-y; }
+
+/* Плашка при наведении — те же стили, что у Recharts-тултипа в исходном
+   дашборде: тёмный фон, тонкая рамка, радиус 8 */
+.cab-tip {
+  position: absolute;
+  z-index: 2;
+  display: none;
+  min-width: 168px;
+  padding: 10px 12px;
+  background: rgba(30, 41, 59, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  box-shadow: 0 16px 34px -16px rgba(0, 0, 0, 0.7);
+  font-size: 0.76rem;
+  line-height: 1.3;
+  pointer-events: none;
+}
+
+.cab-tip.on { display: block; }
+
+.cab-tip-date {
+  margin-bottom: 7px;
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.cab-tip-row { display: flex; align-items: center; gap: 8px; }
+.cab-tip-row + .cab-tip-row { margin-top: 5px; }
+.cab-tip-row i { flex: 0 0 auto; width: 8px; height: 8px; border-radius: 50%; }
+.cab-tip-row b { margin-left: auto; font-weight: 600; }
+
 .cab-list-head {
   display: flex;
   align-items: center;
@@ -1435,11 +1625,13 @@ h3 {
   width: min(1120px, 100%);
 }
 
+/* Tall enough for act 2: the mark, the wire run and two rows of steps stack
+   inside it, so the whole scene reads as one vertical column. */
 .merge-stage {
   --mcw: clamp(225px, 24vw, 290px);
   position: relative;
   width: 100%;
-  height: min(620px, calc(100vh - 140px));
+  height: min(700px, calc(100vh - 140px));
   min-height: 540px;
 }
 
@@ -1484,6 +1676,11 @@ h3 {
   position: absolute;
   z-index: 1;
   width: var(--mcw);
+  /* All three are one box — 416×453 in the design. Without this the card is
+     sized by its content, so a longer line of copy or a taller render (the
+     three PNGs differ: 223×256, 256×255, 241×256) makes one card bigger than
+     its neighbours. */
+  aspect-ratio: 416 / 453;
   background:
     radial-gradient(112% 82% at 100% 12%, rgba(118, 158, 234, 0.42), transparent 58%),
     linear-gradient(180deg, #dce9fc 0%, #e1ebfd 42%, #cfdefb 100%);
@@ -1516,7 +1713,9 @@ h3 {
   width: 80%;
   height: auto;
   align-self: center;
-  margin: 6px auto -26%;
+  /* `auto` on top pins the render to the card's bottom edge, so all three hang
+     past it by the same amount however tall the render itself is. */
+  margin: auto auto -26%;
   /* Lit from above, so a soft contact shadow sits it on the card. */
   filter: drop-shadow(0 12px 16px rgba(18, 48, 158, 0.24));
 }
@@ -1550,7 +1749,7 @@ h3 {
 }
 
 .merge-logo .brand-mark {
-  width: 52px;
+  width: auto;
   height: 52px;
   color: var(--white);
 }
@@ -1580,33 +1779,42 @@ h3 {
   stroke-dashoffset: 1;
 }
 
+/* The grid hangs under the mark, not beside it — the wires drop into it, so
+   `top` is set in script.js (mark + wire run + grid centred as one column). */
 .merge-steps {
   position: absolute;
   z-index: 1;
-  right: 6%;
-  top: 4%;
-  bottom: 4%;
-  width: 45%;
+  /* Full content column, like the design frame: three across, two down */
+  left: 0;
+  right: 0;
+  bottom: auto;
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  grid-template-rows: repeat(3, auto);
-  align-content: center;
-  gap: 12px;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(2, auto);
+  gap: 14px 16px;
   pointer-events: none;
 }
 
 #how { padding-bottom: clamp(44px, 6vw, 72px); }
 
+/* Three across instead of two — 422×222 in the design frame. The vh cap keeps
+   two rows plus the mark above them inside the stage on short viewports.
+
+   Outlined and flat, as drawn: a 1.36px blue stroke on the 422px card (≈1px at
+   our width) and a radius of 5.3% of it, with no shadow. The fill is white
+   rather than transparent so the page's flow-line thread passes behind. */
 .merge-steps .step {
   min-height: 0;
-  aspect-ratio: 5 / 3.5;
+  aspect-ratio: 422 / 222;
+  max-height: 22vh;
   flex-direction: column;
   justify-content: space-between;
   align-items: flex-start;
-  padding: 16px;
+  padding: 22px;
   gap: 10px;
-  border-radius: 16px;
-  box-shadow: 0 10px 24px -14px rgba(18, 48, 158, 0.14);
+  border: 1px solid var(--blue);
+  border-radius: 19px;
+  box-shadow: none;
   opacity: 0;
   will-change: transform, opacity;
 }
@@ -1617,17 +1825,18 @@ h3 {
   line-height: 1.35;
 }
 
+/* 39px on the 422px card in the design — a filled circle, not a bare numeral */
 .merge-steps .step-num {
   flex: 0 0 auto;
-  width: 22px;
-  height: 22px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
   background: var(--blue);
   color: var(--white);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.6rem;
+  font-size: 0.72rem;
   letter-spacing: 0.02em;
 }
 
@@ -1648,12 +1857,12 @@ h3 {
   gap: 14px;
 }
 .merge-scene.static .wires { display: none; }
-.merge-scene.static .merge-card { position: static; width: 100%; }
+.merge-scene.static .merge-card { position: static; width: 100%; aspect-ratio: auto; }
 
 /* Stacked, the cards are in normal flow, so a render hanging past the bottom
    edge would land on the card below it. Here it stays inside. */
 .merge-scene.static .merge-card { padding-bottom: 22px; }
-.merge-scene.static .role-pic { width: 62%; margin-bottom: 0; }
+.merge-scene.static .role-pic { width: 62%; margin: 6px auto 0; }
 .merge-scene.static .merge-center {
   position: static;
   transform: none !important;
@@ -1670,17 +1879,19 @@ h3 {
   gap: 14px;
   margin-top: 12px;
   pointer-events: auto;
-  left: auto !important;
-  right: auto !important;
+  top: auto !important;
 }
 .merge-scene.static .merge-steps .step {
   aspect-ratio: auto;
+  max-height: none;
   flex-direction: row;
   align-items: center;
   justify-content: flex-start;
+  padding: 16px;
   opacity: 1 !important;
   transform: none !important;
 }
+.merge-scene.static .merge-steps .step-num { width: 26px; height: 26px; }
 
 /* Steps */
 
@@ -2324,7 +2535,7 @@ h3 {
   color: var(--white);
 }
 
-.footer-brand .brand-mark { width: 52px; height: 52px; color: var(--blue); }
+.footer-brand .brand-mark { width: auto; height: 52px; color: var(--blue); }
 
 .footer-word {
   font-size: clamp(3rem, 6vw, 4.6rem);
@@ -2542,6 +2753,17 @@ h3 {
   .cab-top { padding: 14px 16px; }
   .cab-hi { font-size: 0.9rem; white-space: normal; }
   .cab-icons { flex: 0 0 auto; }
+
+  /* Колокольчик стоит в ~64px от края карточки, а панель — 320px, поэтому,
+     привязанная к нему, она вылезала за левый край и обрезалась по
+     overflow: hidden у .cab. Растягиваем её по ширине шапки. */
+  .cab-ic { position: static; }
+  .cab-notifs {
+    left: 16px;
+    right: 16px;
+    width: auto;
+    top: calc(100% + 6px);
+  }
 
   /* Заголовок и кнопка не помещались в одну строку — кнопка уходила за край
      карточки (на 360px — на 61px) и обрезалась по overflow: hidden у .cab. */
@@ -2772,8 +2994,8 @@ h3 {
    use. Overrides the base .brand-mark, which is 30px and brand-blue: in here it
    has to fit a 36px tile and read white on the badge's blue. */
 .logo-badge .brand-mark {
-  width: 24px;
-  height: 24px;
+  width: auto;
+  height: 19px;
   color: #fff;
 }
 

@@ -97,14 +97,16 @@ ease-out/expo (never ease-in); only `transform` + `opacity` animated on the GPU;
 
 | Component | Where | Notes |
 | --- | --- | --- |
+| **Brand mark** | `.brand-mark` (navbar badge, merge centre, footer) | the official ₣ glyph from the brand pack (`Flott.zip` → `Union.svg`), inlined once per place as a single filled path with `fill="currentColor"`, so one geometry serves white-on-blue and blue-on-dark. It is portrait (1013×1770) — size it by `height` with `width: auto`, never a square box |
+| **Brand lockup** | `flott-logo.svg` | mark over wordmark, blue on white (`Flott.zip` → `Vector.svg`); used for the round hero badge. The pack's lockups carry an opaque white background, so they only sit on white surfaces |
 | Floating pill **navbar** | `.navbar` | glass, unfolds on load, solidifies on scroll, mobile burger→X + drop-down menu |
 | **Hero** (ice / water split) | `.ihero` | two looping clips, `ice.mp4` + `water_flow.mp4` (both 1280×720, one shared fit rule so they crop identically; `ice.png` stays as the poster/fallback), hard cut down a swelling seam (canvas mask + SVG rule, both from one wave function in `script.js`) |
 | **Hero money blocks** | `.ihero-cards` | frozen invoice + «Доступно сегодня». Overlaid on the hero above 980px (one either side of the seam), following it down the page below that |
 | Trust **marquee** | `.marquee` | infinite partner/registration ticker |
 | **Flott AI** cards | `.section-ai`, `.ai-grid`, `.ai-card`, `.ai-demo` | section is one blue card over `ai-hands.jpg` (the reaching-hands render); the two panels are glass (`backdrop-filter`) so the image carries through them; typewriter demo bubbles → open chat dialog |
 | **AI chat dialog** | `<dialog class="ai-dialog">` | FLIP open, flying avatar, shrink-back close, typing sequence |
-| **How it works** merge scene | `#mergeScene` | scroll-driven SVG "wires" merging three parties → six steps; each role card carries its 3D glass render (`role-bank/supplier/buyer.png`) |
-| **Cabinet** demo | `.cab`, `#cabNav` | interactive dashboard, tab-switch with re-render animation |
+| **How it works** merge scene | `#mergeScene` | scroll-driven SVG "wires": three parties merge up into the mark (each role card carries its 3D glass render, `role-bank/supplier/buyer.png`), then the wires drop and six steps rain down under it in a 3×2 grid |
+| **Cabinet** demo | `.cab`, `#cabNav` | interactive dashboard, opens on «Обзор», tab-switch with re-render animation; «Обзор» and «Денежный поток» carry SVG charts ported from the `flott-website-main` dashboard (90-day inflow/outflow/balance area + monthly comparison bars) with a hover readout. Charts are drawn by hand in `script.js` — the site has no chart library — and sized to the panel it already had, so no tab scrolls. The bell opens a notifications dropdown (`.cab-notifs`), also ported from that dashboard |
 | **Feature rows** (01/02/03) | `.feature-row` | bank card-deck (swap + tilt), client & underwriter panels (tilt) |
 | **Live / traction** | `.live-grid`, `.pipeline`, `.backing` | result cards, deal-cycle pipeline, and the two investment announcements (AloqaVentures / United Ventures) with the amounts set as text rather than left inside the JPEGs |
 | **Security** certs | `.cert-grid`, `.cert-card` | registration/audit cards |
@@ -144,6 +146,7 @@ ease-out/expo (never ease-in); only `transform` + `opacity` animated on the GPU;
 | AI grid parallax | scroll parallax |
 | AI chat open | two-phase FLIP + flying avatar (Telegram-style) |
 | AI chat close | reverse FLIP — shrinks back into the source bubble |
+| Cabinet chart hover readout | pointer-driven SVG cursor line + tooltip |
 | Typewriter bubbles | `IntersectionObserver` + timed typing |
 | Section reveals | `IntersectionObserver` (`.reveal` → `.in`) |
 

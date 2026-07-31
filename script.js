@@ -556,14 +556,13 @@ if (navLinks && navbar && burger) {
   });
 
   // Merge scene, act 1: три стороны сделки стягиваются в логотип flott;
-  // act 2: логотип уходит влево, провода тянутся к шести шагам
+  // act 2: провода уходят вниз, шесть шагов опускаются под логотипом
   var scene = document.getElementById('mergeScene');
   if (scene) {
     var stage = scene.querySelector('.merge-stage');
     var wiresIn = scene.querySelector('.wires:not(.wires-out)');
     var wiresOut = scene.querySelector('.wires-out');
     var mergeCenter = scene.querySelector('.merge-center');
-    var mergeLogo = scene.querySelector('.merge-logo');
     var mergeCaption = scene.querySelector('.mc-caption');
     var stepsWrap = scene.querySelector('.merge-steps');
     var msSteps = Array.prototype.slice.call(scene.querySelectorAll('.merge-steps .step'));
@@ -576,6 +575,8 @@ if (navLinks && navbar && burger) {
     var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     var geo = null;
     var ticking = false;
+    // Насколько марка вырастает к концу act 2 — общая величина для measure() и render
+    var FINAL_SCALE = 1.05;
 
     var clamp01 = function (v) { return Math.max(0, Math.min(1, v)); };
     var easeInOut = function (t) { return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; };
@@ -585,8 +586,7 @@ if (navLinks && navbar && burger) {
       mergeCards.forEach(function (c) { c.style.transform = ''; c.style.opacity = ''; });
       mergeCenter.style.transform = '';
       wiresOut.style.opacity = '';
-      stepsWrap.style.left = '';
-      stepsWrap.style.right = '';
+      stepsWrap.style.top = '';
       if (mergeCaption) mergeCaption.style.opacity = '';
       msSteps.forEach(function (s) {
         s.style.opacity = '';
@@ -604,22 +604,21 @@ if (navLinks && navbar && burger) {
       wiresIn.setAttribute('viewBox', '0 0 ' + w + ' ' + h);
       wiresOut.setAttribute('viewBox', '0 0 ' + w + ' ' + h);
 
-      // Act 2: логотип + провода + сетка шагов центруются как единая группа
-      var FINAL_SCALE = 1.22;
-      var WIRE_RUN = 170;
-      var logoWs = mergeLogo.offsetWidth * FINAL_SCALE;
-      var gridW = stepsWrap.offsetWidth;
-      var groupLeft = Math.max(0, (w - (logoWs + WIRE_RUN + gridW)) / 2);
-      stepsWrap.style.right = 'auto';
-      stepsWrap.style.left = (groupLeft + logoWs + WIRE_RUN) + 'px';
+      // Act 2: марка, провода и сетка шагов центруются как одна вертикальная
+      // группа — сетка висит под логотипом, а не сбоку от него
+      var boxHs = mergeCenter.offsetHeight * FINAL_SCALE;
+      var gridH = stepsWrap.offsetHeight;
+      var drop = Math.max(56, Math.min(110, (h - boxHs - gridH) * 0.55));
+      var groupTop = Math.max(0, (h - (boxHs + drop + gridH)) / 2);
+      var gridTop = groupTop + boxHs + drop;
+      stepsWrap.style.top = gridTop + 'px';
 
       geo = {
         tx: mergeCenter.offsetLeft,
         ty: mergeCenter.offsetTop,
-        shiftX: groupLeft + logoWs / 2 - mergeCenter.offsetLeft,
-        logoHalfW: mergeLogo.offsetWidth / 2,
-        srcYRel: mergeLogo.offsetTop + mergeLogo.offsetHeight / 2 - mergeCenter.offsetHeight / 2,
-        riserBase: stepsWrap.offsetLeft - 26,
+        shiftY: groupTop + boxHs / 2 - mergeCenter.offsetTop,
+        boxHalfH: mergeCenter.offsetHeight / 2,
+        busBase: gridTop - drop * 0.5,
         cards: mergeCards.map(function (el) {
           return {
             el: el,
@@ -627,15 +626,17 @@ if (navLinks && navbar && burger) {
             cy: el.offsetTop + el.offsetHeight / 2
           };
         }),
-        rows: [0, 1, 2].map(function (i) {
-          var s1 = msSteps[i * 2];
-          var s2 = msSteps[i * 2 + 1];
-          var c2X = stepsWrap.offsetLeft + s2.offsetLeft;
+        // Сетка 3×2, порядок чтения обычный (01 02 03 / 04 05 06), поэтому одна
+        // линия кормит колонку: шаг верхнего ряда и шаг под ним
+        cols: [0, 1, 2].map(function (i) {
+          var s1 = msSteps[i];
+          var s2 = msSteps[i + 3];
+          var c2Y = stepsWrap.offsetTop + s2.offsetTop;
           return {
-            rowY: stepsWrap.offsetTop + s1.offsetTop + s1.offsetHeight / 2,
-            entry1X: stepsWrap.offsetLeft + s1.offsetLeft + 2,
-            gapX: c2X - 10,
-            entry2X: c2X + 2,
+            colX: stepsWrap.offsetLeft + s1.offsetLeft + s1.offsetWidth / 2,
+            entry1Y: stepsWrap.offsetTop + s1.offsetTop + 2,
+            gapY: c2Y - 10,
+            entry2Y: c2Y + 2,
             cards: [s1, s2]
           };
         })
@@ -651,22 +652,22 @@ if (navLinks && navbar && burger) {
       return 'M' + sx + ',' + sy + ' C' + sx + ',' + (sy + my) + ' ' + tx + ',' + (ty - my) + ' ' + tx + ',' + ty;
     };
 
-    // Trunk out of the logo → soft rounded elbow to the row → into card 1,
-    // re-emerging in the column gap → into card 2
-    var rowPath = function (sx, sy, rx, rowY, e1, gx, e2) {
-      var v = rowY > sy ? 1 : -1;
-      var dy = Math.abs(rowY - sy);
-      var tail = ' M' + gx + ',' + rowY + ' L' + e2 + ',' + rowY;
-      if (dy < 2) {
-        return 'M' + sx + ',' + sy + ' L' + e1 + ',' + sy + tail;
+    // Trunk down out of the mark → soft rounded elbow across to the column →
+    // into the top edge of card 1, re-emerging in the row gap → into card 2
+    var colPath = function (sx, sy, busY, cx, e1, gapY, e2) {
+      var tail = ' M' + cx + ',' + gapY + ' L' + cx + ',' + e2;
+      var dx = cx - sx;
+      if (Math.abs(dx) < 2) {
+        return 'M' + sx + ',' + sy + ' L' + sx + ',' + e1 + tail;
       }
-      var r = Math.min(18, dy / 2, (rx - sx) / 2, (e1 - rx) / 2);
+      var hd = dx > 0 ? 1 : -1;
+      var r = Math.max(0, Math.min(18, Math.abs(dx) / 2, (busY - sy) / 2, (e1 - busY) / 2));
       return 'M' + sx + ',' + sy +
-        ' L' + (rx - r) + ',' + sy +
-        ' Q' + rx + ',' + sy + ' ' + rx + ',' + (sy + v * r) +
-        ' L' + rx + ',' + (rowY - v * r) +
-        ' Q' + rx + ',' + rowY + ' ' + (rx + r) + ',' + rowY +
-        ' L' + e1 + ',' + rowY + tail;
+        ' L' + sx + ',' + (busY - r) +
+        ' Q' + sx + ',' + busY + ' ' + (sx + hd * r) + ',' + busY +
+        ' L' + (cx - hd * r) + ',' + busY +
+        ' Q' + cx + ',' + busY + ' ' + cx + ',' + (busY + r) +
+        ' L' + cx + ',' + e1 + tail;
     };
 
     var renderScene = function () {
@@ -697,31 +698,32 @@ if (navLinks && navbar && burger) {
         mergeCaption.style.opacity = clamp01((p - 0.3) / 0.08);
       }
 
-      // --- Act 2: dock left, fan out to steps (p 0.42–0.87) ---
+      // --- Act 2: mark lifts, steps rain down underneath it (p 0.42–0.87) ---
       var a = easeOut(clamp01((p - 0.18) / 0.14));
       var f = easeInOut(clamp01((p - 0.42) / 0.14));
-      var cs = 1 + 0.15 * a * (1 - f) + 0.22 * f;
-      var ctx = geo.shiftX * f;
+      var cs = 1 + 0.15 * a * (1 - f) + (FINAL_SCALE - 1) * f;
+      var cty = geo.shiftY * f;
       mergeCenter.style.transform =
-        'translate(calc(-50% + ' + ctx + 'px), -50%) scale(' + cs + ')';
+        'translate(-50%, calc(-50% + ' + cty + 'px)) scale(' + cs + ')';
 
       wiresOut.style.opacity = f;
-      var srcX = geo.tx + ctx + geo.logoHalfW * cs + 10;
-      var srcY = geo.ty + geo.srcYRel * cs;
+      var srcX = geo.tx;
+      var srcY = geo.ty + cty + geo.boxHalfH * cs + 8;
 
-      geo.rows.forEach(function (row, i) {
+      geo.cols.forEach(function (col, i) {
         var ci = clamp01((p - (0.54 + i * 0.1)) / 0.13);
-        var exitY = srcY + (i - 1) * 12;
-        var riserX = geo.riserBase + (i - 1) * 10;
-        var d = rowPath(srcX, exitY, riserX, row.rowY, row.entry1X, row.gapX, row.entry2X);
+        var exitX = srcX + (i - 1) * 12;
+        var busY = Math.max(srcY + 10, geo.busBase + (i - 1) * 9);
+        var d = colPath(exitX, srcY, busY, col.colX, col.entry1Y, col.gapY, col.entry2Y);
         outBases[i].setAttribute('d', d);
         outFlows[i].setAttribute('d', d);
         outBases[i].style.strokeDashoffset = 1 - easeOut(ci);
         outFlows[i].style.opacity = clamp01((ci - 0.75) / 0.25);
-        row.cards.forEach(function (cardEl, j) {
+        // Each step settles down into place from above — vertical, not sideways
+        col.cards.forEach(function (cardEl, j) {
           var cc = easeOut(clamp01((ci - j * 0.18) * 1.4));
           cardEl.style.opacity = cc;
-          cardEl.style.transform = 'translateX(' + 26 * (1 - cc) + 'px)';
+          cardEl.style.transform = 'translateY(' + -30 * (1 - cc) + 'px)';
         });
       });
     };
@@ -874,13 +876,10 @@ if (navLinks && navbar && burger) {
           { label: 'Активные сделки', value: '7', note: '3 на подписании' },
           { label: 'Риск-профиль', value: 'Низкий', note: 'Скоринг 82', tone: 'good' }
         ],
-        listTitle: 'Последние события',
-        action: 'Новая заявка',
-        rows: [
-          { name: 'Выплата по сделке #2841', sub: 'Сегодня, 09:40', val: 'UZS 120M', tag: 'Зачислено', tone: 'good' },
-          { name: 'Заявка #2864 — подписание E-IMZO', sub: 'Ожидает вашей подписи', val: 'UZS 96M', tag: 'В процессе', tone: 'warn' },
-          { name: 'Счёт №1027 подтверждён покупателем', sub: 'Вчера, 18:02', val: 'UZS 96M', tag: 'Готов к финансированию', tone: 'good' },
-          { name: 'Обновлён лимит Turonbank', sub: 'Вчера', val: 'UZS 2.0B', tag: 'Лимит доступен', tone: 'good' }
+        // Высоты подобраны так, чтобы вкладка осталась той же высоты, что и
+        // раньше со списком, — кабинет не скроллится и не растёт
+        charts: [
+          { type: 'area', title: 'Прогнозируемый денежный поток (следующие 90 дней)', h: 356 }
         ]
       },
       cashflow: {
@@ -890,13 +889,9 @@ if (navLinks && navbar && burger) {
           { label: 'Отток за 30 дней', value: 'UZS 1.4B', note: 'Аренда, зарплаты, поставки' },
           { label: 'Прогноз кассового разрыва', value: 'Нет', note: 'Горизонт — 90 дней', tone: 'good' }
         ],
-        listTitle: 'Ближайшие поступления',
-        action: 'Экспорт отчёта',
-        rows: [
-          { name: 'Финансирование Turonbank', sub: 'Заявка #2864', val: 'UZS 96M', tag: 'Завтра', tone: 'good' },
-          { name: 'Оплата от Korzinka Retail', sub: 'По счёту №1024', val: 'UZS 310M', tag: '12 августа' },
-          { name: 'Оплата от Makro Supermarket', sub: 'По счёту №1019', val: 'UZS 180M', tag: '15 августа' },
-          { name: 'Оплата от Havas Group', sub: 'По счёту №1031', val: 'UZS 240M', tag: '21 августа' }
+        charts: [
+          { type: 'area', title: 'Прогноз денежного потока на 90 дней', h: 178 },
+          { type: 'bar', title: 'Сравнение месячного денежного потока', h: 178 }
         ]
       },
       invoices: {
@@ -978,8 +973,227 @@ if (navLinks && navbar && burger) {
       }
     };
 
+    var cabActive = 'overview';
+
     var cabEsc = function (s) {
       return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    };
+
+    /* Диаграммы кабинета — ровно те же, что в дашборде flott-website-main
+       (src/components/DemoDashboardSection.tsx): приток/отток/накопленный
+       баланс за 90 дней с шагом 5 дней и помесячное сравнение. Там это
+       Recharts; здесь на сайте нет ни одной библиотеки, поэтому тот же график
+       рисуется руками в SVG — те же ряды, цвета и градиенты. */
+    var CF_IN = [312, 268, 402, 351, 289, 435, 318, 372, 264, 448, 396, 305, 421, 358, 289, 466, 384, 412];
+    var CF_OUT = [278, 341, 296, 385, 254, 372, 419, 288, 356, 302, 441, 268, 372, 415, 264, 398, 312, 356];
+    var CF_MONTHS = ['Авг', 'Сен', 'Окт', 'Ноя', 'Дек', 'Янв'];
+    var CF_BAR_IN = [1630, 1730, 1870, 1970, 2060, 2180];
+    var CF_BAR_OUT = [1490, 1630, 1700, 1820, 1900, 1990];
+    var C_IN = '#10b981', C_OUT = '#ef4444', C_BAL = '#3b82f6';
+    var C_GRID = 'rgba(255,255,255,0.07)', C_AXIS = 'rgba(255,255,255,0.45)';
+    var cabGradId = 0;
+
+    // Плавная кривая: горизонтальные касательные в точках, без выбросов —
+    // тот же приём, что у проводов merge-сцены
+    var cabSmooth = function (pts) {
+      var d = 'M' + pts[0][0] + ',' + pts[0][1];
+      for (var i = 1; i < pts.length; i++) {
+        var p0 = pts[i - 1], p1 = pts[i], mx = (p1[0] - p0[0]) / 2;
+        d += ' C' + (p0[0] + mx) + ',' + p0[1] + ' ' + (p1[0] - mx) + ',' + p1[1] +
+          ' ' + p1[0] + ',' + p1[1];
+      }
+      return d;
+    };
+
+    var cabGrid = function (pl, w, y, ticks, fmt) {
+      var s = '';
+      ticks.forEach(function (t) {
+        var ty = y(t);
+        s += '<line x1="' + pl + '" y1="' + ty + '" x2="' + w + '" y2="' + ty +
+          '" stroke="' + C_GRID + '" stroke-dasharray="3 3"/>' +
+          '<text x="' + (pl - 8) + '" y="' + (ty + 4) + '" text-anchor="end" fill="' + C_AXIS +
+          '" font-size="11">' + fmt(t) + '</text>';
+      });
+      return s;
+    };
+
+    var cabAreaChart = function (w, h) {
+      var pl = 46, pr = 8, pt = 10, pb = 22;
+      var iw = w - pl - pr, ih = h - pt - pb;
+      var n = CF_IN.length, i, bal = [], b = 1250;
+      for (i = 0; i < n; i++) { b += CF_IN[i] - CF_OUT[i]; bal.push(b); }
+      var maxV = 1800;
+      var X = function (k) { return pl + iw * k / (n - 1); };
+      var Y = function (v) { return pt + ih * (1 - v / maxV); };
+      var pts = [];
+
+      var svg = '<defs>';
+      var series = [
+        { vals: CF_IN, color: C_IN, sw: 2 },
+        { vals: CF_OUT, color: C_OUT, sw: 2 },
+        { vals: bal, color: C_BAL, sw: 3 }
+      ];
+      series.forEach(function (s) {
+        s.id = 'cabg' + (++cabGradId);
+        svg += '<linearGradient id="' + s.id + '" x1="0" y1="0" x2="0" y2="1">' +
+          '<stop offset="5%" stop-color="' + s.color + '" stop-opacity="0.3"/>' +
+          '<stop offset="95%" stop-color="' + s.color + '" stop-opacity="0"/></linearGradient>';
+      });
+      svg += '</defs>';
+      svg += cabGrid(pl, w - pr, Y, [0, 600, 1200, 1800], function (t) { return t + 'M'; });
+
+      // подписи оси X — каждая третья точка, иначе даты налезают друг на друга
+      var today = new Date();
+      var fmtDate = new Intl.DateTimeFormat('ru-RU', { day: 'numeric', month: 'short' });
+      var labels = [];
+      for (i = 0; i < n; i++) {
+        var dt = new Date(today);
+        dt.setDate(dt.getDate() + i * 5);
+        labels.push(fmtDate.format(dt));
+        if (i % 3 === 0) {
+          svg += '<text x="' + X(i) + '" y="' + (h - 6) + '" text-anchor="middle" fill="' + C_AXIS +
+            '" font-size="11">' + labels[i] + '</text>';
+        }
+      }
+
+      series.forEach(function (s) {
+        var pp = s.vals.map(function (v, k) { return [X(k), Y(v)]; });
+        var line = cabSmooth(pp);
+        svg += '<path d="' + line + ' L' + X(n - 1) + ',' + (pt + ih) + ' L' + pl + ',' + (pt + ih) +
+          ' Z" fill="url(#' + s.id + ')"/>' +
+          '<path d="' + line + '" fill="none" stroke="' + s.color + '" stroke-width="' + s.sw +
+          '" stroke-linecap="round" stroke-linejoin="round"/>';
+      });
+
+      for (i = 0; i < n; i++) {
+        pts.push({
+          x: X(i),
+          label: labels[i],
+          items: series.map(function (s, si) {
+            return {
+              name: si === 0 ? 'Поступления' : si === 1 ? 'Выплаты' : 'Баланс',
+              color: s.color, v: s.vals[i], y: Y(s.vals[i])
+            };
+          })
+        });
+      }
+      return { svg: svg, pts: pts, top: pt, bottom: pt + ih };
+    };
+
+    var cabBarChart = function (w, h) {
+      var pl = 46, pr = 8, pt = 10, pb = 22;
+      var iw = w - pl - pr, ih = h - pt - pb;
+      var maxV = 2400;
+      var Y = function (v) { return pt + ih * (1 - v / maxV); };
+      var groupW = iw / CF_MONTHS.length;
+      var bw = Math.min(24, groupW * 0.3);
+      var svg = cabGrid(pl, w - pr, Y, [0, 800, 1600, 2400], function (t) { return t + 'M'; });
+
+      var bar = function (bx, v, color) {
+        var by = Y(v), bh = pt + ih - by, r = Math.min(6, bw / 2, bh);
+        return '<path d="M' + bx + ',' + (by + bh) + ' L' + bx + ',' + (by + r) +
+          ' Q' + bx + ',' + by + ' ' + (bx + r) + ',' + by +
+          ' L' + (bx + bw - r) + ',' + by +
+          ' Q' + (bx + bw) + ',' + by + ' ' + (bx + bw) + ',' + (by + r) +
+          ' L' + (bx + bw) + ',' + (by + bh) + ' Z" fill="' + color + '"/>';
+      };
+
+      var pts = [];
+      CF_MONTHS.forEach(function (m, k) {
+        var cx = pl + groupW * (k + 0.5);
+        svg += bar(cx - bw - 3, CF_BAR_IN[k], C_IN) + bar(cx + 3, CF_BAR_OUT[k], C_OUT) +
+          '<text x="' + cx + '" y="' + (h - 6) + '" text-anchor="middle" fill="' + C_AXIS +
+          '" font-size="11">' + m + '</text>';
+        pts.push({
+          x: cx, label: m, band: groupW,
+          items: [
+            { name: 'Поступления', color: C_IN, v: CF_BAR_IN[k], y: Y(CF_BAR_IN[k]) },
+            { name: 'Выплаты', color: C_OUT, v: CF_BAR_OUT[k], y: Y(CF_BAR_OUT[k]) }
+          ]
+        });
+      });
+      return { svg: svg, pts: pts, top: pt, bottom: pt + ih };
+    };
+
+    var cabLegend = function (withBalance) {
+      var s = '<div class="cab-legend">' +
+        '<span class="cab-leg cab-leg-in"><i></i>Поступления</span>' +
+        '<span class="cab-leg cab-leg-out"><i></i>Выплаты</span>';
+      if (withBalance) s += '<span class="cab-leg cab-leg-bal"><i></i>Баланс</span>';
+      return s + '</div>';
+    };
+
+    /* Наведение на график: курсор-линия и панель со значениями за эту дату —
+       то же поведение, что у <Tooltip> из Recharts в исходном дашборде
+       (тёмная плашка, рамка 1px, радиус 8, значения как «UZS 312M»). */
+    var cabBindHover = function (box, chart, w, h) {
+      var svg = box.querySelector('svg');
+      var guide = box.querySelector('.cab-guide');
+      var tip = box.querySelector('.cab-tip');
+      var last = -1;
+
+      var hide = function () {
+        last = -1;
+        guide.innerHTML = '';
+        tip.classList.remove('on');
+      };
+
+      var show = function (ev) {
+        var r = svg.getBoundingClientRect();
+        var x = (ev.clientX - r.left) * (w / r.width);
+        var best = 0, bestD = Infinity;
+        chart.pts.forEach(function (p, k) {
+          var dx = Math.abs(p.x - x);
+          if (dx < bestD) { bestD = dx; best = k; }
+        });
+        var p = chart.pts[best];
+        if (best !== last) {
+          last = best;
+          var g = p.band
+            ? '<rect x="' + (p.x - p.band / 2) + '" y="' + chart.top + '" width="' + p.band +
+              '" height="' + (chart.bottom - chart.top) + '" rx="8" fill="rgba(255,255,255,0.06)"/>'
+            : '<line x1="' + p.x + '" y1="' + chart.top + '" x2="' + p.x + '" y2="' + chart.bottom +
+              '" stroke="rgba(255,255,255,0.25)" stroke-dasharray="3 3"/>';
+          p.items.forEach(function (it) {
+            g += '<circle cx="' + p.x + '" cy="' + it.y + '" r="4" fill="' + it.color +
+              '" stroke="#0f172a" stroke-width="2"/>';
+          });
+          guide.innerHTML = g;
+          var rows = '<div class="cab-tip-date">' + cabEsc(p.label) + '</div>';
+          p.items.forEach(function (it) {
+            rows += '<div class="cab-tip-row"><i style="background:' + it.color + '"></i>' +
+              cabEsc(it.name) + '<b>UZS ' + it.v + 'M</b></div>';
+          });
+          tip.innerHTML = rows;
+          tip.classList.add('on');
+        }
+        // плашка держится у точки, но не вылезает за карточку
+        var tw = tip.offsetWidth, th = tip.offsetHeight;
+        var px = p.x * (r.width / w);
+        tip.style.left = Math.max(0, Math.min(px - tw / 2, r.width - tw)) + 'px';
+        var py = (ev.clientY - r.top) - th - 14;
+        tip.style.top = Math.max(0, Math.min(py, r.height - th)) + 'px';
+      };
+
+      svg.addEventListener('pointermove', show);
+      svg.addEventListener('pointerleave', hide);
+      svg.addEventListener('pointercancel', hide);
+    };
+
+    // SVG рисуется по фактической ширине карточки, поэтому текст осей не
+    // масштабируется вместе с ней и остаётся читаемым на любом экране
+    var cabDrawCharts = function (d) {
+      Array.prototype.forEach.call(cabMain.querySelectorAll('.cab-chart-body'), function (box, i) {
+        var cfg = d.charts[i];
+        var w = box.clientWidth;
+        if (!w) return;
+        var h = Math.round(Math.max(170, Math.min(cfg.h, w * 0.4)));
+        var chart = cfg.type === 'bar' ? cabBarChart(w, h) : cabAreaChart(w, h);
+        box.innerHTML = '<svg width="' + w + '" height="' + h + '" viewBox="0 0 ' + w + ' ' + h +
+          '" role="img" aria-label="' + cabEsc(cfg.title) + '">' + chart.svg +
+          '<g class="cab-guide"></g></svg><div class="cab-tip"></div>';
+        cabBindHover(box, chart, w, h);
+      });
     };
 
     var cabRender = function (key) {
@@ -997,25 +1211,59 @@ if (navLinks && navbar && burger) {
         });
         html += '</div>';
       }
-      html += '<div class="cab-list"><div class="cab-list-head">' +
-        '<span class="cab-list-title">' + cabEsc(d.listTitle) + '</span>' +
-        '<button class="cab-action" type="button">' + cabEsc(d.action) + '</button></div>' +
-        '<div class="cab-rows">';
-      d.rows.forEach(function (r) {
-        html += '<div class="cab-row"><div class="cab-row-left">' +
-          '<div class="cab-row-name">' + cabEsc(r.name) + '</div>' +
-          '<div class="cab-row-sub">' + cabEsc(r.sub) + '</div></div>' +
-          '<div class="cab-row-right">' +
-          (r.val ? '<div class="cab-row-val">' + cabEsc(r.val) + '</div>' : '') +
-          '<div class="cab-row-tag' + (r.tone ? ' tone-' + r.tone : '') + '">' + cabEsc(r.tag) + '</div>' +
-          '</div></div>';
-      });
-      html += '</div></div>';
+      if (d.charts) {
+        d.charts.forEach(function (c) {
+          html += '<div class="cab-chart"><div class="cab-chart-head">' +
+            '<span class="cab-chart-title">' + cabEsc(c.title) + '</span>' +
+            cabLegend(c.type !== 'bar') + '</div>' +
+            '<div class="cab-chart-body"></div></div>';
+        });
+      } else {
+        html += '<div class="cab-list"><div class="cab-list-head">' +
+          '<span class="cab-list-title">' + cabEsc(d.listTitle) + '</span>' +
+          '<button class="cab-action" type="button">' + cabEsc(d.action) + '</button></div>' +
+          '<div class="cab-rows">';
+        d.rows.forEach(function (r) {
+          html += '<div class="cab-row"><div class="cab-row-left">' +
+            '<div class="cab-row-name">' + cabEsc(r.name) + '</div>' +
+            '<div class="cab-row-sub">' + cabEsc(r.sub) + '</div></div>' +
+            '<div class="cab-row-right">' +
+            (r.val ? '<div class="cab-row-val">' + cabEsc(r.val) + '</div>' : '') +
+            '<div class="cab-row-tag' + (r.tone ? ' tone-' + r.tone : '') + '">' + cabEsc(r.tag) + '</div>' +
+            '</div></div>';
+        });
+        html += '</div></div>';
+      }
       cabMain.innerHTML = html;
+      if (d.charts) cabDrawCharts(d);
+      cabActive = key;
       cabMain.classList.remove('cab-anim');
       void cabMain.offsetWidth;
       cabMain.classList.add('cab-anim');
     };
+
+    // Колокольчик: выпадающий список уведомлений
+    var cabBell = document.getElementById('cabBell');
+    var cabNotifs = document.getElementById('cabNotifs');
+    if (cabBell && cabNotifs) {
+      var notifsOpen = function (on) {
+        cabNotifs.classList.toggle('on', on);
+        cabBell.setAttribute('aria-expanded', on ? 'true' : 'false');
+      };
+      cabBell.addEventListener('click', function (e) {
+        e.stopPropagation();
+        notifsOpen(!cabNotifs.classList.contains('on'));
+      });
+      // Клик по самому списку не должен его закрывать
+      cabNotifs.addEventListener('click', function (e) { e.stopPropagation(); });
+      document.addEventListener('click', function () { notifsOpen(false); });
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && cabNotifs.classList.contains('on')) {
+          notifsOpen(false);
+          cabBell.focus();
+        }
+      });
+    }
 
     cabNav.addEventListener('click', function (e) {
       var btn = e.target.closest('.cab-tab');
@@ -1026,7 +1274,15 @@ if (navLinks && navbar && burger) {
       cabRender(btn.getAttribute('data-tab'));
     });
 
-    cabRender('suppliers');
+    // Ширина SVG зашита в разметку, поэтому при ресайзе график перерисовываем
+    var cabResizeTimer = null;
+    window.addEventListener('resize', function () {
+      if (!CAB[cabActive] || !CAB[cabActive].charts) return;
+      clearTimeout(cabResizeTimer);
+      cabResizeTimer = setTimeout(function () { cabDrawCharts(CAB[cabActive]); }, 150);
+    });
+
+    cabRender('overview');
   }
 
   // Веер заявок в блоке банка: клик поднимает карту, скролл — параллакс
