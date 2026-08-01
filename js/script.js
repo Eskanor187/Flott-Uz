@@ -1130,8 +1130,10 @@ if (navLinks && navbar && burger) {
     var CF_MONTHS = ['Авг', 'Сен', 'Окт', 'Ноя', 'Дек', 'Янв'];
     var CF_BAR_IN = [1630, 1730, 1870, 1970, 2060, 2180];
     var CF_BAR_OUT = [1490, 1630, 1700, 1820, 1900, 1990];
-    var C_IN = '#10b981', C_OUT = '#ef4444', C_BAL = '#3b82f6';
-    var C_GRID = 'rgba(255,255,255,0.07)', C_AXIS = 'rgba(255,255,255,0.45)';
+    // Панель светлая, поэтому сетка и подписи — тёмные на белом, а баланс
+    // рисуется фирменным синим, а не голубым из исходного тёмного дашборда
+    var C_IN = '#10b981', C_OUT = '#ef4444', C_BAL = '#2353e8';
+    var C_GRID = 'rgba(10,11,16,0.08)', C_AXIS = 'rgba(10,11,16,0.45)';
     var cabGradId = 0;
 
     // Плавная кривая: горизонтальные касательные в точках, без выбросов —
@@ -1177,7 +1179,7 @@ if (navLinks && navbar && burger) {
       series.forEach(function (s) {
         s.id = 'cabg' + (++cabGradId);
         svg += '<linearGradient id="' + s.id + '" x1="0" y1="0" x2="0" y2="1">' +
-          '<stop offset="5%" stop-color="' + s.color + '" stop-opacity="0.3"/>' +
+          '<stop offset="5%" stop-color="' + s.color + '" stop-opacity="0.16"/>' +
           '<stop offset="95%" stop-color="' + s.color + '" stop-opacity="0"/></linearGradient>';
       });
       svg += '</defs>';
@@ -1292,12 +1294,13 @@ if (navLinks && navbar && burger) {
           last = best;
           var g = p.band
             ? '<rect x="' + (p.x - p.band / 2) + '" y="' + chart.top + '" width="' + p.band +
-              '" height="' + (chart.bottom - chart.top) + '" rx="8" fill="rgba(255,255,255,0.06)"/>'
+              '" height="' + (chart.bottom - chart.top) + '" rx="8" fill="rgba(35,83,232,0.07)"/>'
             : '<line x1="' + p.x + '" y1="' + chart.top + '" x2="' + p.x + '" y2="' + chart.bottom +
-              '" stroke="rgba(255,255,255,0.25)" stroke-dasharray="3 3"/>';
+              '" stroke="rgba(10,11,16,0.22)" stroke-dasharray="3 3"/>';
+          // Обводка точки цветом карточки, а не панели — карточка теперь белая
           p.items.forEach(function (it) {
             g += '<circle cx="' + p.x + '" cy="' + it.y + '" r="4" fill="' + it.color +
-              '" stroke="#0f172a" stroke-width="2"/>';
+              '" stroke="#fff" stroke-width="2"/>';
           });
           guide.innerHTML = g;
           var rows = '<div class="cab-tip-date">' + cabEsc(p.label) + '</div>';
