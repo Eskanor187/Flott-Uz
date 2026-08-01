@@ -7,13 +7,19 @@
   <meta name="description" content="Flott автоматизирует факторинг от заявки до выплаты: банк, поставщик и покупатель на одной платформе. Деньги за часы, подпись E-IMZO, скоринг в реальном времени.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Voltaire&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Playfair+Display:ital,wght@1,400;1,500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 <header class="navbar" id="navbar">
-    <a class="nav-logo" href="#">
-      <span class="logo-badge">f</span>
+    <!-- aria-label because the wordmark is hidden under 365px, which would
+         otherwise leave this link with no accessible name at all. -->
+    <a class="nav-logo" href="#" aria-label="Flott — на главную">
+      <span class="logo-badge">
+        <svg class="brand-mark" viewBox="0 0 1013 1770" aria-hidden="true">
+          <path d="M949.697 0.0201065C984.659 0.0257228 1013 28.379 1013 63.3526V189.394C1013 224.372 984.654 252.726 949.688 252.727H854.943C732.56 252.727 633.349 351.969 633.349 474.39V568.338H949.688C984.654 568.338 1013 596.693 1013 631.67V758.335C1013 793.312 984.654 821.667 949.688 821.668H633.349V885.744L633.178 948.332H949.688C984.654 948.333 1013 976.688 1013 1011.66V1138.33C1013 1173.31 984.654 1201.66 949.688 1201.66H632.499L632.161 1327.86C631.505 1572.27 433.233 1770.04 188.903 1770L63.3032 1769.98C28.3407 1769.97 0.00160728 1741.62 0.00154572 1706.65V1580.61C0.00154877 1545.63 28.3475 1517.27 63.314 1517.27H158.28C280.663 1517.27 379.875 1418.03 379.875 1295.61V1201.66H63.3125C28.346 1201.66 9.70286e-05 1173.31 0 1138.33V1011.66C3.05687e-06 976.687 28.346 948.332 63.3125 948.332H379.875V884.256L380.047 821.668H63.3125C28.346 821.668 0 793.313 0 758.335V631.67C6.69298e-08 596.693 28.346 568.338 63.3125 568.338H380.725L381.064 442.138C381.719 197.733 579.991 -0.039243 824.321 5.84083e-06L949.697 0.0201065Z" fill="currentColor"/>
+        </svg>
+      </span>
       <span class="logo-wordmark">flott</span>
     </a>
 
@@ -37,38 +43,106 @@
   </header>
 
 <main>
-<section class="vhero">
-      <div class="hero-bg" aria-hidden="true">
-        <video class="hero-video" id="hero-video" src="hero.mp4" autoplay muted playsinline preload="auto"></video>
+<section class="ihero" id="hero">
+      <video class="ihero-ice" id="ihero-ice" src="assets/video/ice.mp4"
+             autoplay loop muted playsinline preload="auto" aria-hidden="true"></video>
+
+      <!-- The water plays underneath the whole viewport; a canvas mask painted
+           in script.js decides where it shows through the ice. -->
+      <video class="ihero-water" id="ihero-water" src="assets/video/water_flow.mp4"
+             autoplay loop muted playsinline preload="auto" aria-hidden="true"></video>
+
+      <!-- The rule exists to hide the join between the still ice image and the
+           video, so it runs solid and unbroken — any fade would let the blend
+           show through. The Flott mark is badged at its center. -->
+      <svg class="ihero-seam" id="ihero-seam" preserveAspectRatio="none" aria-hidden="true">
+        <path id="ihero-seam-path" fill="none" stroke="#b3d3ea" stroke-width="54"
+              stroke-linejoin="round" stroke-linecap="round"></path>
+      </svg>
+
+      <div class="ihero-badge" id="ihero-badge" aria-hidden="true">
+        <img src="assets/img/flott-logo.svg" alt="" width="92" height="92">
       </div>
 
-      <div class="hero-inner">
+      <!-- Three lines, not two: «денежным потоком» set on one line is 571px
+           wide and runs straight into the invoice card on the ice side. -->
+      <span class="ihero-tagline" id="ihero-tagline" aria-hidden="true">
+        <span>Управляет</span>
+        <span>денежным</span>
+        <span>потоком</span>
+      </span>
 
-        <div class="hero-text" id="hero-text">
-          <p class="v-eyebrow">ЦИФРОВОЙ ФАКТОРИНГ · УЗБЕКИСТАН</p>
-          <h1 class="headline"><span class="line">Деньги сейчас,</span> <span class="line">не через месяцы</span></h1>
-          <p class="subtext">Flott — платформа цифрового факторинга. Автоматизирует сделку от заявки до выплаты для банка, поставщика и покупателя: счета из Налогового комитета, скоринг в реальном времени, юридически значимая подпись E-IMZO.</p>
-          <div class="hero-buttons">
-            <button class="v-btn v-btn-primary" type="button">ЗАПРОСИТЬ ДЕМО</button>
-            <button class="v-btn v-btn-secondary" type="button">КАК ЭТО РАБОТАЕТ?</button>
-          </div>
-        </div>
-
+      <div class="ihero-head" id="hero-text">
+        <h1 class="ihero-h1">
+          <span class="line">Превратите замороженный счет </span>
+          <span class="line serif-accent ihero-serif">в денежный поток</span>
+        </h1>
       </div>
 
-      <button class="mute-toggle" id="mute-toggle" type="button" aria-label="Включить звук" aria-pressed="false">
-        <svg class="icon-off" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" fill="currentColor" stroke="none"></polygon>
-          <line x1="15" y1="9" x2="21" y2="15"></line>
-          <line x1="21" y1="9" x2="15" y2="15"></line>
-        </svg>
-        <svg class="icon-on" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" fill="currentColor" stroke="none"></polygon>
-          <path d="M15.5 8.5a5 5 0 0 1 0 7"></path>
-          <path d="M18.5 5.5a9 9 0 0 1 0 13"></path>
-        </svg>
-      </button>
     </section>
+
+<!-- The seam doesn't stop at the fold: it carries on down the page as a thread
+     that meanders and narrows. Decorative only — it sits behind every section
+     (see .flow-line). -->
+<svg class="flow-line" id="flow-line" aria-hidden="true" preserveAspectRatio="none">
+  <defs>
+    <linearGradient id="flow-line-fade" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#b3d3ea"/>
+      <stop offset="0.015" stop-color="#9ec6e2"/>
+      <stop offset="0.05" stop-color="#2353e8" stop-opacity="0.9"/>
+      <stop offset="0.85" stop-color="#2353e8" stop-opacity="0.75"/>
+      <stop offset="1" stop-color="#2353e8" stop-opacity="0.35"/>
+    </linearGradient>
+  </defs>
+  <path id="flow-line-path" fill="url(#flow-line-fade)"></path>
+</svg>
+
+<!-- ===== Invoice → money ===== -->
+<!-- The two hero blocks (frozen invoice / released money) used to say this side
+     by side. Here the same claim is one object: a single card that IS the
+     invoice and then IS the payout, morphing as you scroll. No drawn banknotes —
+     the money reads as a figure and a state, not as a picture of cash. -->
+<section class="section morph" id="morph">
+  <div class="container">
+    <div class="morph-scene" id="morphScene">
+      <div class="morph-sticky">
+        <div class="morph-stage">
+          <!-- Заголовок внутри липкой сцены: иначе он уезжает вверх раньше,
+               чем начинается сама трансформация -->
+          <div class="morph-head">
+            <p class="eyebrow reveal">Что меняет Flott</p>
+            <h2 class="reveal d1">Счёт-фактура превращается в деньги с FLott.</h2>
+            <p class="section-sub reveal d2" id="morphSub">Тот&nbsp;же счёт №&nbsp;FL-4412 — просто пролистайте.</p>
+          </div>
+          <div class="morph-card" id="morphCard">
+            <!-- Лицо счёта -->
+            <div class="morph-face morph-doc">
+              <div class="morph-doc-head">
+                <span class="morph-doc-title">Счёт-фактура</span>
+                <span class="morph-doc-tag">№ FL-4412</span>
+              </div>
+              <div class="morph-rows" aria-hidden="true">
+                <span></span><span></span><span></span><span></span><span></span>
+              </div>
+              <div class="morph-total">
+                <span class="morph-total-label">Сумма к оплате</span>
+                <span class="morph-total-val">1 240 000 000 <small>UZS</small></span>
+              </div>
+            </div>
+            <!-- Лицо выплаты -->
+            <div class="morph-face morph-cash">
+              <p class="morph-cash-label"><i aria-hidden="true"></i>Доступно сегодня</p>
+              <p class="morph-cash-sum">1 240 000 000 <small>сум</small></p>
+              <p class="morph-cash-meta">Счёт № FL-4412 · выплата Flott</p>
+              <button class="btn btn-white morph-cta magnetic" type="button">Запросить демо</button>
+            </div>
+          </div>
+          <p class="morph-caption" id="morphCaption">Оплата покупателя — через 62 дня</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
 
 <!-- ===== Trust marquee ===== -->
 <section class="marquee-strip" aria-label="Партнёры и регистрации">
@@ -90,10 +164,15 @@
   </div>
 </section>
 
-<!-- ===== Flott AI ===== -->
-<section class="section" id="ai">
+<!-- ===== Flott AI =====
+     The whole section is one blue card over the reaching-hands render; the two
+     panels inside are glass so the image carries through them. -->
+<section class="section section-ai" id="ai">
+  <!-- Positioned by script.js so the Flott mark lands dead centre of the card;
+       the CSS below is the sensible cover-and-centre it starts from. -->
+  <img class="ai-bg" src="assets/img/ai-hands.jpg" alt="" aria-hidden="true">
   <div class="container">
-    <p class="eyebrow reveal">Flott AI</p>
+    <p class="eyebrow eyebrow-light reveal">Flott AI</p>
     <h2 class="reveal d1">Искусственный интеллект<br>внутри каждой сделки.</h2>
     <p class="section-sub reveal d2">Flott читает денежные потоки и&nbsp;счета-фактуры —
       и&nbsp;подсказывает каждой стороне следующий шаг.</p>
@@ -158,33 +237,31 @@
             <path class="wire-flow"></path>
             <path class="wire-flow"></path>
           </svg>
+          <!-- Decorative: each render just restates the heading beside it, so
+               it stays out of the accessibility tree. -->
           <div class="merge-card mc-top">
-            <div class="role-ic">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M4 18h16M6 18v-7M10 18v-7M14 18v-7M18 18v-7M3 8l9-5 9 5z"/></svg>
-            </div>
             <h3>Банк-фактор</h3>
             <p>Финансирует сделки, видит риск и&nbsp;портфель целиком.</p>
+            <img class="role-pic" src="assets/img/role-bank.png" alt="" aria-hidden="true"
+              width="223" height="256" loading="lazy" decoding="async">
           </div>
           <div class="merge-card mc-left">
-            <div class="role-ic">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6M9 13h6M9 17h6"/></svg>
-            </div>
             <h3>Поставщики</h3>
             <p>Превращают неоплаченные счета в&nbsp;деньги сегодня.</p>
+            <img class="role-pic" src="assets/img/role-supplier.png" alt="" aria-hidden="true"
+              width="256" height="255" loading="lazy" decoding="async">
           </div>
           <div class="merge-card mc-right">
-            <div class="role-ic">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>
-            </div>
             <h3>Покупатели</h3>
             <p>Сохраняют отсрочку, подтверждают сделки в&nbsp;два клика.</p>
+            <img class="role-pic" src="assets/img/role-buyer.png" alt="" aria-hidden="true"
+              width="241" height="256" loading="lazy" decoding="async">
           </div>
           <div class="merge-center">
             <div class="merge-logo">
-              <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true">
-                <path d="M20.5 5c-3.8 0-5.2 2.3-5.2 5.8v9.6c0 2.8-1.1 4.7-3.8 5.3" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round"/>
-                <path d="M9 13.2h14M9 19h10.5" stroke="currentColor" stroke-width="3.2" stroke-linecap="round"/>
-              </svg>
+              <svg class="brand-mark" viewBox="0 0 1013 1770" aria-hidden="true">
+          <path d="M949.697 0.0201065C984.659 0.0257228 1013 28.379 1013 63.3526V189.394C1013 224.372 984.654 252.726 949.688 252.727H854.943C732.56 252.727 633.349 351.969 633.349 474.39V568.338H949.688C984.654 568.338 1013 596.693 1013 631.67V758.335C1013 793.312 984.654 821.667 949.688 821.668H633.349V885.744L633.178 948.332H949.688C984.654 948.333 1013 976.688 1013 1011.66V1138.33C1013 1173.31 984.654 1201.66 949.688 1201.66H632.499L632.161 1327.86C631.505 1572.27 433.233 1770.04 188.903 1770L63.3032 1769.98C28.3407 1769.97 0.00160728 1741.62 0.00154572 1706.65V1580.61C0.00154877 1545.63 28.3475 1517.27 63.314 1517.27H158.28C280.663 1517.27 379.875 1418.03 379.875 1295.61V1201.66H63.3125C28.346 1201.66 9.70286e-05 1173.31 0 1138.33V1011.66C3.05687e-06 976.687 28.346 948.332 63.3125 948.332H379.875V884.256L380.047 821.668H63.3125C28.346 821.668 0 793.313 0 758.335V631.67C6.69298e-08 596.693 28.346 568.338 63.3125 568.338H380.725L381.064 442.138C381.719 197.733 579.991 -0.039243 824.321 5.84083e-06L949.697 0.0201065Z" fill="currentColor"/>
+        </svg>
               <span>flott</span>
             </div>
             <p class="mc-caption">Три стороны — одна платформа</p>
@@ -248,10 +325,54 @@
           <span class="cab-hint">Агент денежного потока Flott сегодня работает за вас.</span>
         </div>
         <div class="cab-icons">
-          <button class="cab-icbtn" type="button" aria-label="Уведомления">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
-            <span class="cab-dot">3</span>
-          </button>
+          <div class="cab-ic">
+            <button class="cab-icbtn" type="button" id="cabBell" aria-label="Уведомления"
+              aria-haspopup="true" aria-expanded="false" aria-controls="cabNotifs">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+              <span class="cab-dot">3</span>
+            </button>
+            <!-- Список — тот же, что в дашборде flott-website-main -->
+            <div class="cab-notifs" id="cabNotifs" role="dialog" aria-label="Уведомления">
+              <div class="cab-notifs-head">Уведомления</div>
+              <div class="cab-notifs-list">
+                <div class="cab-notif unread">
+                  <span class="cab-notif-dot" aria-hidden="true"></span>
+                  <div class="cab-notif-body">
+                    <div class="cab-notif-title">Получен платёж</div>
+                    <div class="cab-notif-msg">INV-2043 оплачен — UZS 320M</div>
+                    <div class="cab-notif-time">5 минут назад</div>
+                  </div>
+                </div>
+                <div class="cab-notif unread">
+                  <span class="cab-notif-dot" aria-hidden="true"></span>
+                  <div class="cab-notif-body">
+                    <div class="cab-notif-title">Счёт просрочен</div>
+                    <div class="cab-notif-msg">INV-2041 просрочен на&nbsp;3 дня</div>
+                    <div class="cab-notif-time">2 часа назад</div>
+                  </div>
+                </div>
+                <div class="cab-notif unread">
+                  <span class="cab-notif-dot" aria-hidden="true"></span>
+                  <div class="cab-notif-body">
+                    <div class="cab-notif-title">Финансирование одобрено</div>
+                    <div class="cab-notif-msg">Доступна кредитная линия UZS 500M</div>
+                    <div class="cab-notif-time">Вчера</div>
+                  </div>
+                </div>
+                <div class="cab-notif">
+                  <span class="cab-notif-dot" aria-hidden="true"></span>
+                  <div class="cab-notif-body">
+                    <div class="cab-notif-title">Предупреждение о&nbsp;денежном потоке</div>
+                    <div class="cab-notif-msg">Прогнозируемый дефицит через 15 дней</div>
+                    <div class="cab-notif-time">2 дня назад</div>
+                  </div>
+                </div>
+              </div>
+              <div class="cab-notifs-foot">
+                <button class="cab-notifs-all" type="button">Посмотреть все уведомления</button>
+              </div>
+            </div>
+          </div>
           <button class="cab-icbtn" type="button" aria-label="Профиль">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
           </button>
@@ -260,7 +381,7 @@
       <div class="cab-body">
         <aside class="cab-side">
           <nav class="cab-nav" id="cabNav" aria-label="Разделы кабинета">
-            <button class="cab-tab" type="button" data-tab="overview">
+            <button class="cab-tab active" type="button" data-tab="overview">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/><path d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>
               <span>Обзор</span>
             </button>
@@ -272,7 +393,7 @@
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/></svg>
               <span>Счета</span>
             </button>
-            <button class="cab-tab active" type="button" data-tab="suppliers">
+            <button class="cab-tab" type="button" data-tab="suppliers">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11a1 1 0 0 0 1 1h2"/><path d="M15 18H9"/><path d="M19 18h2a1 1 0 0 0 1-1v-3.65a1 1 0 0 0-.22-.624l-3.48-4.35A1 1 0 0 0 17.52 8H14"/><circle cx="17" cy="18" r="2"/><circle cx="7" cy="18" r="2"/></svg>
               <span>Поставщики</span>
             </button>
@@ -514,6 +635,37 @@
         <span class="pipe">Отчёты<small>ЦБ, банк</small></span>
       </div>
     </div>
+
+    <!-- Инвестиции. Суммы вынесены в текст, а не оставлены внутри картинок:
+         на снимках они набраны по-узбекски, и в JPEG их не прочитает ни поиск,
+         ни скринридер. -->
+    <div class="backing">
+      <p class="backing-kicker reveal">Инвестиции</p>
+      <div class="backing-grid">
+        <a class="backing-card reveal" href="https://www.aloqaventures.uz/news/zlg97hg3s1-aloqaventures-invested-50000-in-flott"
+          target="_blank" rel="noopener noreferrer">
+          <img class="backing-shot" src="assets/img/aloqa_ventures.jpg"
+            alt="Команда Flott и фонда AloqaVentures после подписания инвестиции"
+            width="1024" height="1280" loading="lazy" decoding="async">
+          <div class="backing-body">
+            <p class="backing-sum">$50 000</p>
+            <h3>AloqaVentures</h3>
+            <p class="backing-note">Фонд проинвестировал Flott</p>
+          </div>
+        </a>
+        <a class="backing-card reveal d1" href="https://t.me/pivotuzbekistan/3165"
+          target="_blank" rel="noopener noreferrer">
+          <img class="backing-shot" src="assets/img/united_ventures.jpg"
+            alt="Команда Flott и фонда United Ventures после подписания инвестиции"
+            width="1920" height="1280" loading="lazy" decoding="async">
+          <div class="backing-body">
+            <p class="backing-sum">$27 000</p>
+            <h3>United Ventures</h3>
+            <p class="backing-note">Инвестиции в финтех-стартап Flott</p>
+          </div>
+        </a>
+      </div>
+    </div>
   </div>
 </section>
 
@@ -558,14 +710,55 @@
   </div>
 </section>
 
-<!-- ===== CTA ===== -->
-<section class="cta" id="cta">
-  <div class="container cta-inner">
-    <h2 class="reveal">Каждый день ожидания —<br>упущенная сделка.</h2>
-    <p class="cta-sub reveal d1">Подключите Flott — пилотный период бесплатно.</p>
-    <div class="cta-actions reveal d2">
-      <a href="mailto:info@flott.uz?subject=Запрос демо Flott" class="btn btn-white magnetic">Запросить демо</a>
-      <a href="https://flott.uz" class="btn btn-outline-light">flott.uz</a>
+<!-- ===== CTA — контактная форма ===== -->
+<section class="section contact-section" id="cta">
+  <div class="container">
+    <div class="contact-card reveal">
+
+      <!-- Форма слева. Статический сайт: отправка открывает почтовый клиент,
+           см. script.js -->
+      <form class="contact-form" id="contactForm" novalidate>
+        <div class="field">
+          <label for="cfName">Ваше имя</label>
+          <input type="text" id="cfName" name="name" autocomplete="name" required
+            placeholder="Как к вам обращаться">
+        </div>
+        <div class="field">
+          <label for="cfEmail">Email</label>
+          <input type="email" id="cfEmail" name="email" autocomplete="email" required
+            placeholder="you@company.uz">
+        </div>
+        <div class="field field-wide">
+          <label for="cfCompany">Компания</label>
+          <input type="text" id="cfCompany" name="company" autocomplete="organization"
+            placeholder="Название организации">
+        </div>
+        <div class="field field-wide">
+          <label for="cfMessage">Сообщение</label>
+          <textarea id="cfMessage" name="message" rows="4"
+            placeholder="Коротко о задаче — объёмы, сроки, кто ваши покупатели"></textarea>
+        </div>
+        <div class="contact-actions">
+          <button class="btn btn-primary magnetic" type="submit">
+            Запросить демо
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 2 11 13M22 2l-7 20-4-9-9-4z"/></svg>
+          </button>
+          <p class="contact-note" id="contactNote" role="status"></p>
+        </div>
+      </form>
+
+      <!-- Синяя панель справа — тот же довод, контакты и песочные часы -->
+      <aside class="contact-info">
+        <h2 class="contact-title">Каждый день ожидания —<br><span class="serif-accent">упущенная сделка.</span></h2>
+        <p class="contact-lead">Подключите Flott — пилотный период бесплатно.</p>
+
+        <!-- Decorative — the copy above it already makes the point about
+             waiting, so it stays out of the accessibility tree. It runs past
+             the panel's right and bottom edges on purpose. -->
+        <img class="contact-visual" src="assets/img/hourglass.png" alt="" aria-hidden="true"
+          width="390" height="420" loading="lazy" decoding="async">
+      </aside>
+
     </div>
   </div>
 </section>
@@ -575,9 +768,8 @@
   <div class="container">
     <div class="footer-top">
       <div class="footer-brand">
-        <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true">
-          <path d="M20.5 5c-3.8 0-5.2 2.3-5.2 5.8v9.6c0 2.8-1.1 4.7-3.8 5.3" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round"/>
-          <path d="M9 13.2h14M9 19h10.5" stroke="currentColor" stroke-width="3.2" stroke-linecap="round"/>
+        <svg class="brand-mark" viewBox="0 0 1013 1770" aria-hidden="true">
+          <path d="M949.697 0.0201065C984.659 0.0257228 1013 28.379 1013 63.3526V189.394C1013 224.372 984.654 252.726 949.688 252.727H854.943C732.56 252.727 633.349 351.969 633.349 474.39V568.338H949.688C984.654 568.338 1013 596.693 1013 631.67V758.335C1013 793.312 984.654 821.667 949.688 821.668H633.349V885.744L633.178 948.332H949.688C984.654 948.333 1013 976.688 1013 1011.66V1138.33C1013 1173.31 984.654 1201.66 949.688 1201.66H632.499L632.161 1327.86C631.505 1572.27 433.233 1770.04 188.903 1770L63.3032 1769.98C28.3407 1769.97 0.00160728 1741.62 0.00154572 1706.65V1580.61C0.00154877 1545.63 28.3475 1517.27 63.314 1517.27H158.28C280.663 1517.27 379.875 1418.03 379.875 1295.61V1201.66H63.3125C28.346 1201.66 9.70286e-05 1173.31 0 1138.33V1011.66C3.05687e-06 976.687 28.346 948.332 63.3125 948.332H379.875V884.256L380.047 821.668H63.3125C28.346 821.668 0 793.313 0 758.335V631.67C6.69298e-08 596.693 28.346 568.338 63.3125 568.338H380.725L381.064 442.138C381.719 197.733 579.991 -0.039243 824.321 5.84083e-06L949.697 0.0201065Z" fill="currentColor"/>
         </svg>
         <span class="footer-word">flott</span>
       </div>
@@ -641,6 +833,6 @@
     </style>
   </noscript>
 
-<script src="script.js"></script>
+<script src="js/script.js"></script>
 </body>
 </html>

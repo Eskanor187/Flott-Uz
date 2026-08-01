@@ -2,7 +2,7 @@
 
 A "requirements.txt" for the website design: everything the site is built from — tech, tokens,
 components, motion, and the method behind the animation work. Everything below is drawn from the
-actual source ([index.html](index.html), [style.css](style.css), [script.js](script.js)).
+actual source ([index.html](index.html), [style.css](css/style.css), [script.js](js/script.js)).
 
 ---
 
@@ -13,8 +13,8 @@ No framework, no build step, no package manager, no `node_modules`. Pure static 
 | Requirement | Version / note |
 | --- | --- |
 | HTML5 | single page — [index.html](index.html) |
-| CSS3 | one hand-written stylesheet — [style.css](style.css) (~2200 lines) |
-| JavaScript | vanilla, ES5-flavored (no transpile) — [script.js](script.js) |
+| CSS3 | one hand-written stylesheet — [style.css](css/style.css) (~2200 lines) |
+| JavaScript | vanilla, ES5-flavored (no transpile) — [script.js](js/script.js) |
 | Dev server | `python -m http.server` (see [.claude/launch.json](../.claude/launch.json)) |
 | External deps | **only** Google Fonts — everything else is local |
 
@@ -29,18 +29,22 @@ No framework, no build step, no package manager, no `node_modules`. Pure static 
 
 Loaded via Google Fonts (`display=swap`):
 
-- **Golos Text** — primary UI/display face, weights 400–800
-- **Inter** — loaded as a companion face, weights 400–800
-- Stack: `"Golos Text", -apple-system, "Segoe UI", Roboto, sans-serif`
+- **Inter** — the whole page, body and headings alike, weights 400–800
+- **Playfair Display** — italic only (400/500), used for the first line of the
+  hero headline and nothing else
+- Stack: `"Inter", -apple-system, "Segoe UI", Roboto, sans-serif`
+- `--font-head` resolves to `var(--font)`; there is no separate display face.
+  (Voltaire was the display face until the hero was replaced — it's gone.)
 
 Fluid type scale (all `clamp()`-based):
 
 | Role | Size |
 | --- | --- |
-| `h1` | `clamp(3.2rem, 8.2vw, 6.6rem)`, line-height 0.98, weight 600 |
-| `h2` | `clamp(2.2rem, 4.6vw, 3.8rem)`, weight 600 |
-| `.h2-sm` | `clamp(1.9rem, 3.4vw, 2.8rem)` |
-| `h3` | `1.25rem`, weight 600 |
+| `h1` | `clamp(3.2rem, 8.2vw, 6.6rem)`, line-height 0.98, weight 400 |
+| `h2` | `clamp(2.2rem, 4.6vw, 3.8rem)`, weight 400 |
+| `.h2-sm` | `clamp(1.9rem, 3.4vw, 2.8rem)`, weight 400 |
+| `h3` | `1.25rem`, weight 600 — small enough that 400 reads flabby |
+| `.ihero-h1` | `clamp(40px, min(7.4vw, 7.8vh), 96px)`, weight 400 |
 | `.eyebrow` | `0.8rem`, uppercase, letter-spacing `0.14em`, blue |
 | body | 1rem / line-height 1.5, `-webkit-font-smoothing: antialiased` |
 
@@ -48,7 +52,7 @@ Fluid type scale (all `clamp()`-based):
 
 ## 3. Color tokens
 
-**Light system** (`:root`, [style.css:6](style.css)) — fruitful.com-inspired blue / white / black:
+**Light system** (`:root`, [style.css:6](css/style.css)) — fruitful.com-inspired blue / white / black:
 
 | Token | Value | Use |
 | --- | --- | --- |
@@ -64,16 +68,14 @@ Fluid type scale (all `clamp()`-based):
 | `--tint-chip` | `#d7e4ff` | chips / button hover |
 | `--line` / `--line-strong` | `rgba(10,11,16,.08 / .14)` | borders |
 
-**Hero / video system** (`.vhero` scope, [style.css:2148](style.css)) — deep navy + cyan:
+**Hero** (`.ihero` scope) — no palette of its own: it's the ice still and the
+water clip, white type over both, and the site's own `.panel` for the invoice
+card. The seam rule is `#b3d3ea`, sampled from the ice highlights down the
+centre strip so it sits in the image's own tonal range.
 
-| Token | Value |
-| --- | --- |
-| `--grad-start` / `--grad-end` | `#174CEA` → `#082677` |
-| `--cyan` | `#5FFFF3` (hero primary CTA, highlights) |
-| `--navy-deep` | `#0A1B4D` |
-| `--btn-navy` | `#0B2E92` |
-| `--text-soft` | `#D7E1FB` |
-| `--hero-video-bg` | `#e2e5ea` (fallback fill behind hero.mp4) |
+The deep-navy/cyan tokens below (`--grad-start`, `--cyan`, `--navy-deep`,
+`--btn-navy`, `--text-soft`, `--hero-video-bg`) belong to the retired
+full-bleed-video hero and are no longer referenced by `style.css`.
 
 ---
 
@@ -95,24 +97,27 @@ ease-out/expo (never ease-in); only `transform` + `opacity` animated on the GPU;
 
 | Component | Where | Notes |
 | --- | --- | --- |
+| **Brand mark** | `.brand-mark` (navbar badge, merge centre, footer) | the official ₣ glyph from the brand pack (`Flott.zip` → `Union.svg`), inlined once per place as a single filled path with `fill="currentColor"`, so one geometry serves white-on-blue and blue-on-dark. It is portrait (1013×1770) — size it by `height` with `width: auto`, never a square box |
+| **Brand lockup** | `flott-logo.svg` | mark over wordmark, blue on white (`Flott.zip` → `Vector.svg`); used for the round hero badge. The pack's lockups carry an opaque white background, so they only sit on white surfaces |
 | Floating pill **navbar** | `.navbar` | glass, unfolds on load, solidifies on scroll, mobile burger→X + drop-down menu |
-| **Hero** (full-bleed video) | `.vhero` | `hero.mp4` background, staggered text reveal, mute toggle, animated "pipe" canvas |
+| **Hero** (ice / water split) | `.ihero` | two looping clips, `ice.mp4` + `water_flow.mp4` (both 1280×720, one shared fit rule so they crop identically; `ice.png` stays as the poster/fallback), hard cut down a swelling seam (canvas mask + SVG rule, both from one wave function in `script.js`), with the flott mark badged at its centre |
+| **Invoice → money** morph | `#morphScene`, `.morph-card` | the section straight after the hero, and the direction the hero brainstorm filed as «счёт → деньги». One card carries both states: a portrait invoice (ruled rows, frosted amount) that widens, flattens and turns blue into the payout tile, while a caption counts 62 days down to «сегодня». Abstract by design — no drawn banknotes; the money is a figure and a state. It replaced the two blocks that used to sit on the hero |
 | Trust **marquee** | `.marquee` | infinite partner/registration ticker |
-| **Flott AI** cards | `.ai-grid`, `.ai-card`, `.ai-demo` | typewriter demo bubbles → open chat dialog |
+| **Flott AI** cards | `.section-ai`, `.ai-grid`, `.ai-card`, `.ai-demo` | section is one blue card over `ai-hands.jpg` (the reaching-hands render); the two panels are glass (`backdrop-filter`) so the image carries through them; typewriter demo bubbles → open chat dialog |
 | **AI chat dialog** | `<dialog class="ai-dialog">` | FLIP open, flying avatar, shrink-back close, typing sequence |
-| **How it works** merge scene | `#mergeScene` | scroll-driven SVG "wires" merging three parties → six steps |
-| **Cabinet** demo | `.cab`, `#cabNav` | interactive dashboard, tab-switch with re-render animation |
+| **How it works** merge scene | `#mergeScene` | scroll-driven SVG "wires": three parties merge up into the mark (each role card carries its 3D glass render, `role-bank/supplier/buyer.png`), then the wires drop and six steps rain down under it in a 3×2 grid |
+| **Cabinet** demo | `.cab`, `#cabNav` | interactive dashboard, opens on «Обзор», tab-switch with re-render animation; «Обзор» and «Денежный поток» carry SVG charts ported from the `flott-website-main` dashboard (90-day inflow/outflow/balance area + monthly comparison bars) with a hover readout. Charts are drawn by hand in `script.js` — the site has no chart library — and sized to the panel it already had, so no tab scrolls. The bell opens a notifications dropdown (`.cab-notifs`), also ported from that dashboard |
 | **Feature rows** (01/02/03) | `.feature-row` | bank card-deck (swap + tilt), client & underwriter panels (tilt) |
-| **Live / traction** | `.live-grid`, `.pipeline` | result cards + deal-cycle pipeline |
+| **Live / traction** | `.live-grid`, `.pipeline`, `.backing` | result cards, deal-cycle pipeline, and the two investment announcements (AloqaVentures / United Ventures) with the amounts set as text rather than left inside the JPEGs |
 | **Security** certs | `.cert-grid`, `.cert-card` | registration/audit cards |
-| **CTA** | `.cta` | magnetic primary button |
+| **CTA** contact form | `.contact-card` | 4-field form on the left, blue panel on the right (closing line + the `hourglass.png` render, which overhangs the panel's right and bottom edges rather than being sized to fit); static site, so submit composes a `mailto:` for the visitor's own client |
 | **Footer** | `.site-footer` | brand + link columns |
 
 ---
 
 ## 6. Animation inventory
 
-**CSS keyframes** ([style.css](style.css)):
+**CSS keyframes** ([style.css](css/style.css)):
 
 | Name | Purpose |
 | --- | --- |
@@ -126,7 +131,7 @@ ease-out/expo (never ease-in); only `transform` + `opacity` animated on the GPU;
 | `cabIn` | cabinet content on tab switch |
 | `flow` | animated flow along the merge-scene wires |
 
-**JS-driven motion** ([script.js](script.js)):
+**JS-driven motion** ([script.js](js/script.js)):
 
 | Effect | Type |
 | --- | --- |
@@ -134,6 +139,7 @@ ease-out/expo (never ease-in); only `transform` + `opacity` animated on the GPU;
 | Navbar solid-on-scroll | scroll state toggle |
 | Mobile menu open/close | `@starting-style` + `allow-discrete` transition |
 | Hero "pipe" background | Canvas 2D animation loop |
+| Invoice → money morph | scroll-driven (rAF): geometry, colour, two faces handing over, day counter |
 | Merge scene | scroll-driven (rAF, `getBoundingClientRect`) |
 | Bank card deck | click-swap + scroll parallax + hover fan |
 | Panel tilt (01/02/03 cards) | cursor-reactive 3D via `--tx/--ty` vars |
@@ -141,6 +147,7 @@ ease-out/expo (never ease-in); only `transform` + `opacity` animated on the GPU;
 | AI grid parallax | scroll parallax |
 | AI chat open | two-phase FLIP + flying avatar (Telegram-style) |
 | AI chat close | reverse FLIP — shrinks back into the source bubble |
+| Cabinet chart hover readout | pointer-driven SVG cursor line + tooltip |
 | Typewriter bubbles | `IntersectionObserver` + timed typing |
 | Section reveals | `IntersectionObserver` (`.reveal` → `.in`) |
 
