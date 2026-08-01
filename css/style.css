@@ -1674,12 +1674,10 @@ h3 {
   to { stroke-dashoffset: -22; }
 }
 
-/* Matched to the design file. In there the card is a rounded rect masking a
-   slice of the hands render with a big white soft-light circle over it — but
-   sampling the rendered result, all that resolves to a smooth pale blue
-   (#dce9fc → #e1ebfd, deepening to about #a8c4f6 at the right edge), with no
-   readable structure left. Gradients reproduce it exactly and cost nothing,
-   where masking an 84KB photo into each of three cards would not.
+/* The newer frame has structure the earlier flat gradient didn't: a big light
+   disc sitting in the card's top-left corner, over a pale blue field. Two
+   gradients draw it — no image needed, and it scales with the card instead of
+   being pinned to one size.
 
    Proportions are taken off the design's 416×453 card: radius and padding are
    both ~7.7% of the width. */
@@ -1692,9 +1690,14 @@ h3 {
      three PNGs differ: 223×256, 256×255, 241×256) makes one card bigger than
      its neighbours. */
   aspect-ratio: 416 / 453;
+  /* Фон из макета: большой светлый круг, посаженный в левый верхний угол
+     карточки, на бледно-синем поле. Радиус в процентах, а не в пикселях, —
+     иначе круг «съезжает» вместе с шириной карточки. Край чуть размыт (97 →
+     100%), как в исходнике: он читается, но не режет глаз. */
   background:
-    radial-gradient(112% 82% at 100% 12%, rgba(118, 158, 234, 0.42), transparent 58%),
-    linear-gradient(180deg, #dce9fc 0%, #e1ebfd 42%, #cfdefb 100%);
+    radial-gradient(ellipse 80% 74% at 0% 0%,
+      #f7faff 0 98%, rgba(247, 250, 255, 0) 100%),
+    linear-gradient(145deg, #cddcf9 0%, #b9cef2 100%);
   border-radius: 22px;
   padding: 22px 22px 0;
   display: flex;
@@ -1703,11 +1706,22 @@ h3 {
   will-change: transform, opacity;
 }
 
-.merge-card h3 { font-size: 1.08rem; color: var(--blue); }
+/* Размеры сняты с макета (416×453): заголовок — 8.4% ширины карточки, текст —
+   5.3%, поэтому заданы в процентах, а не в rem. Цвета оттуда же: #1052F2 у
+   заголовка и тёмно-синий #0A3599 у текста — он выглядит синим, но это не
+   фирменный синий. */
+.merge-card h3 {
+  font-size: clamp(1.25rem, 8.4%, 1.6rem);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: #1052f2;
+}
 
-/* #0a3599 straight off the design — a navy, where the rest of the page uses a
-   neutral grey for body copy. */
-.merge-card p { color: #0a3599; font-size: 0.88rem; }
+.merge-card p {
+  font-size: clamp(0.9rem, 5.3%, 1.1rem);
+  line-height: 1.35;
+  color: #0a3599;
+}
 
 /* All three sit in a row beneath the mark, as in the design file. The class is
    still called mc-top because it is the first card in the DOM and the wire
