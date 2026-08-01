@@ -1,0 +1,504 @@
+/* ============================================================
+   Flott — landing styles
+   ============================================================ */
+
+:root {
+  /* Fill shown behind the full-bleed hero video while it loads. hero.mp4 is
+     shot on a neutral light-gray studio backdrop; swap this if the video gets
+     re-rendered on a different backdrop. */
+  --hero-video-bg: #e2e5ea;
+
+  --grad-start: #174CEA;
+  --grad-end: #082677;
+  --cyan: #5FFFF3;
+  --navy-deep: #0A1B4D;
+  --btn-navy: #0B2E92;
+  --text-soft: #D7E1FB;
+  --font: "Golos Text", "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  min-height: 100vh;
+  font-family: var(--font);
+  color: #fff;
+  background: linear-gradient(90deg, var(--grad-start) 0%, var(--grad-end) 100%);
+  background-attachment: fixed;
+  overflow-x: hidden;
+}
+
+/* Subtle sheen near the top-left */
+body::before {
+  content: "";
+  position: fixed;
+  top: -30vh;
+  left: -20vw;
+  width: 90vw;
+  height: 90vh;
+  background: radial-gradient(closest-side, rgba(255, 255, 255, 0.05), transparent 70%);
+  filter: blur(60px);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ============================================================
+   Navbar — floating pill
+   ============================================================ */
+
+.navbar {
+  position: fixed;
+  top: 28px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(1450px, 90%);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 28px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.07);
+  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  z-index: 100;
+  opacity: 0;
+}
+
+/* ============================================================
+   Entrance choreography
+   Fires when .reveal lands (video playback starts — the safe's
+   glide phase). Navbar and hero run in PARALLEL; all delays are
+   relative to that moment:
+
+   Navbar:
+   0.00s  bar unfolds from a thin line at top-center, expanding
+          outward left+right while fading in (0.6s ease-out)
+   0.65s  logo, then nav links left→right every 0.08s
+   1.25s  demo button (scale 95%→100%) — navbar done ~1.65s
+
+   Hero (simultaneously, on the left):
+   0.20s  eyebrow
+   0.30s  headline line 1, +0.15s line 2
+   0.95s  paragraph
+   1.30s  primary CTA (scale 95%→100%), +0.1s secondary
+   ~1.85s everything static
+   ============================================================ */
+
+@keyframes navbar-unfold {
+  0%   { opacity: 0; transform: translateX(-50%) scale(0.06, 0.35); }
+  60%  { opacity: 1; }
+  100% { opacity: 1; transform: translateX(-50%) scale(1, 1); }
+}
+
+@keyframes fade-rise {
+  from { opacity: 0; transform: translateY(18px); }
+  to   { opacity: 1; transform: none; }
+}
+
+@keyframes fade-rise-scale {
+  from { opacity: 0; transform: translateY(12px) scale(0.95); }
+  to   { opacity: 1; transform: none; }
+}
+
+.navbar.reveal {
+  opacity: 1;
+  animation: navbar-unfold 0.6s ease-out backwards;
+}
+
+.nav-logo,
+.nav-links a,
+.nav-cta,
+.nav-burger {
+  opacity: 0;
+}
+
+.navbar.reveal .nav-logo,
+.navbar.reveal .nav-links a,
+.navbar.reveal .nav-burger {
+  opacity: 1;
+  animation: fade-rise 0.4s var(--ease-out-expo) backwards;
+}
+
+.navbar.reveal .nav-cta {
+  opacity: 1;
+  animation: fade-rise-scale 0.4s var(--ease-out-expo) 1.25s backwards;
+}
+
+.navbar.reveal .nav-logo { animation-delay: 0.65s; }
+.navbar.reveal .nav-links a:nth-child(1) { animation-delay: 0.73s; }
+.navbar.reveal .nav-links a:nth-child(2) { animation-delay: 0.81s; }
+.navbar.reveal .nav-links a:nth-child(3) { animation-delay: 0.89s; }
+.navbar.reveal .nav-links a:nth-child(4) { animation-delay: 0.97s; }
+.navbar.reveal .nav-links a:nth-child(5) { animation-delay: 1.05s; }
+.navbar.reveal .nav-links a:nth-child(6) { animation-delay: 1.13s; }
+.navbar.reveal .nav-burger { animation-delay: 1.25s; }
+
+.nav-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  flex-shrink: 0;
+}
+
+.logo-badge {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: #4C74F0;
+  color: #fff;
+  font-weight: 800;
+  font-size: 20px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.logo-wordmark {
+  color: #fff;
+  font-weight: 700;
+  font-size: 20px;
+}
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: clamp(16px, 2vw, 32px);
+}
+
+.nav-links a {
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 15px;
+  font-weight: 500;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: color 0.2s ease;
+}
+
+.nav-links a:hover {
+  color: #fff;
+}
+
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.nav-cta {
+  background: var(--btn-navy);
+  color: #fff;
+  font-family: inherit;
+  font-weight: 700;
+  font-size: 14px;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 999px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.2s ease;
+}
+
+.nav-cta:hover {
+  background: #1440B8;
+}
+
+.nav-burger {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  width: 40px;
+  height: 40px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+}
+
+.nav-burger span {
+  display: block;
+  width: 20px;
+  height: 2px;
+  background: #fff;
+  border-radius: 2px;
+  transition: transform 0.25s ease, opacity 0.25s ease;
+}
+
+/* ============================================================
+   Hero
+   ============================================================ */
+
+.hero {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  padding: 150px 0 60px;
+  position: relative;
+  z-index: 1;
+  overflow: hidden;
+}
+
+/* Full-bleed video background */
+.hero-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: var(--hero-video-bg);
+}
+
+.hero-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  /* Bias the crop toward the safe (it sits centered-slightly-right in the
+     source frame) when the viewport isn't 16:9. */
+  object-position: 65% 50%;
+  display: block;
+}
+
+.hero-inner {
+  position: relative;
+  z-index: 1;
+  width: min(1450px, 90%);
+  margin: 0 auto;
+}
+
+.hero-text {
+  max-width: 620px;
+}
+
+/* Hero entrance — see the choreography map above the navbar rules */
+.eyebrow,
+.headline .line,
+.subtext,
+.hero-buttons .btn {
+  opacity: 0;
+}
+
+.hero-text.reveal .eyebrow {
+  opacity: 1;
+  animation: fade-rise 0.45s var(--ease-out-expo) 0.2s backwards;
+}
+
+.hero-text.reveal .headline .line {
+  opacity: 1;
+  animation: fade-rise 0.5s var(--ease-out-expo) backwards;
+}
+
+.hero-text.reveal .headline .line:nth-child(1) { animation-delay: 0.3s; }
+.hero-text.reveal .headline .line:nth-child(2) { animation-delay: 0.45s; }
+
+.hero-text.reveal .subtext {
+  opacity: 1;
+  animation: fade-rise 0.4s var(--ease-out-expo) 0.95s backwards;
+}
+
+.hero-text.reveal .hero-buttons .btn {
+  opacity: 1;
+  animation: fade-rise-scale 0.45s var(--ease-out-expo) backwards;
+}
+
+.hero-text.reveal .hero-buttons .btn-primary { animation-delay: 1.3s; }
+.hero-text.reveal .hero-buttons .btn-secondary { animation-delay: 1.4s; }
+
+.eyebrow {
+  color: var(--cyan);
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  margin-bottom: 20px;
+}
+
+.headline {
+  color: #fff;
+  font-weight: 800;
+  font-size: clamp(40px, 5vw, 64px);
+  line-height: 1.05;
+  letter-spacing: -0.01em;
+  margin-bottom: 24px;
+}
+
+.headline .line {
+  display: block;
+}
+
+.subtext {
+  max-width: 480px;
+  color: var(--text-soft);
+  font-size: 17px;
+  line-height: 1.6;
+  margin-bottom: 36px;
+}
+
+.hero-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.btn {
+  font-family: inherit;
+  font-weight: 700;
+  font-size: 15px;
+  letter-spacing: 0.03em;
+  padding: 16px 32px;
+  border-radius: 999px;
+  border: none;
+  cursor: pointer;
+  transition: filter 0.2s ease, transform 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+}
+
+.btn-primary {
+  background: var(--cyan);
+  color: var(--navy-deep);
+}
+
+.btn-primary:hover {
+  filter: brightness(1.08);
+  transform: scale(1.03);
+}
+
+.btn-secondary {
+  background: transparent;
+  border: 1.5px solid rgba(255, 255, 255, 0.4);
+  color: #fff;
+  padding: 14.5px 30.5px; /* compensate for the border so both buttons match height */
+}
+
+.btn-secondary:hover {
+  border-color: rgba(255, 255, 255, 0.85);
+  background: rgba(255, 255, 255, 0.07);
+}
+
+/* ============================================================
+   Mute toggle
+   ============================================================ */
+
+.mute-toggle {
+  position: absolute;
+  right: 28px;
+  bottom: 28px;
+  z-index: 2;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(8, 20, 60, 0.55);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  color: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s ease;
+}
+
+.mute-toggle:hover {
+  background: rgba(8, 20, 60, 0.8);
+}
+
+.mute-toggle .icon-on { display: none; }
+.mute-toggle.unmuted .icon-on { display: block; }
+.mute-toggle.unmuted .icon-off { display: none; }
+
+/* ============================================================
+   Responsive
+   ============================================================ */
+
+@media (max-width: 980px) {
+  .nav-links {
+    display: none;
+    position: absolute;
+    top: calc(100% + 12px);
+    left: 0;
+    right: 0;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 4px;
+    padding: 12px;
+    border-radius: 24px;
+    background: rgba(10, 24, 74, 0.92);
+    -webkit-backdrop-filter: blur(20px);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+  }
+
+  .navbar.nav-open .nav-links {
+    display: flex;
+  }
+
+  .nav-links a {
+    padding: 12px 16px;
+    border-radius: 14px;
+  }
+
+  .nav-links a:hover {
+    background: rgba(255, 255, 255, 0.08);
+  }
+
+  .nav-burger {
+    display: flex;
+  }
+
+  .navbar.nav-open .nav-burger span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+  .navbar.nav-open .nav-burger span:nth-child(2) { opacity: 0; }
+  .navbar.nav-open .nav-burger span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+  .hero {
+    padding-top: 130px;
+  }
+
+  .hero-text {
+    max-width: none;
+    text-align: center;
+  }
+
+  .subtext {
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .hero-buttons {
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .nav-cta {
+    padding: 10px 16px;
+    font-size: 13px;
+  }
+
+  .navbar {
+    padding: 12px 18px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .navbar.reveal,
+  .navbar.reveal .nav-logo,
+  .navbar.reveal .nav-links a,
+  .navbar.reveal .nav-cta,
+  .navbar.reveal .nav-burger,
+  .hero-text.reveal .eyebrow,
+  .hero-text.reveal .headline .line,
+  .hero-text.reveal .subtext,
+  .hero-text.reveal .hero-buttons .btn {
+    animation: none;
+  }
+}
