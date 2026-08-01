@@ -15,7 +15,7 @@ No framework, no build step, no package manager, no `node_modules`. Pure static 
 | HTML5 | single page — [index.html](index.html) |
 | CSS3 | one hand-written stylesheet — [style.css](css/style.css) (~2200 lines) |
 | JavaScript | vanilla, ES5-flavored (no transpile) — [script.js](js/script.js) |
-| Dev server | `python -m http.server` (see [.claude/launch.json](../.claude/launch.json)) |
+| Dev server | `python -m http.server` (see [.claude/launch.json](.claude/launch.json)) |
 | External deps | **only** Google Fonts — everything else is local |
 
 **Browser APIs relied on** (all with graceful fallbacks):
