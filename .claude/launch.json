@@ -1,0 +1,17 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "flott-site",
+      "runtimeExecutable": "python",
+      "runtimeArgs": ["-m", "http.server", "8748", "--directory", "."],
+      "port": 8748
+    },
+    {
+      "name": "habits",
+      "runtimeExecutable": "python",
+      "runtimeArgs": ["-m", "http.server", "8749", "--directory", "D:/habit-tracker"],
+      "port": 8749
+    }
+  ]
+}

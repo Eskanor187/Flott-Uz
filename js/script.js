@@ -2,27 +2,41 @@
 //
 // The water video plays across the whole viewport; a canvas mask decides where
 // it shows through the ice. The divide isn't straight — it sways like a slow
-// swell, and the mask's blend, the rule that hides the join and the badge all
-// ride that one curve, which is what keeps the rule over the seam at every
+// swell, and the mask's blend, the rule that hides the join and the two bars
+// all ride that one curve, which is what keeps the rule over the seam at every
 // height.
 
 const WAVE_AMPLITUDE = 26;
 const WAVE_LENGTH = 440;
 
-// Diameter of the Flott badge sitting on the seam.
-const LOGO_SIZE = 92;
-
 // Width of the ice→water blend in the mask, centered on the split. The rule
 // that covers it must stay wider (stroke-width in the markup) or the join
 // between the still image and the video shows past the rule's edges.
-const SEAM_W = LOGO_SIZE / 2;
+const SEAM_W = 46;
 
-// The badge — and the tagline locked up under it — sit at the seam's midpoint.
-// Running the wave from y = 0 left the seam wherever the swell happened to be at
-// that height (12px left of centre on a 375×812 phone), which threw the whole
-// lockup off to one side. Anchoring the wave's zero crossing at the hero's
-// mid-height means the seam is dead centre exactly where the badge sits, so the
-// lockup is centred and still genuinely on the line rather than pinned beside it.
+// The two bars that make the seam read as the Flott mark. Proportions come off
+// the ƒ glyph (1013×1770, bars 254 thick, centres 380 apart, full width):
+// at our 54px stroke that scale gives ~80px between centres and ~216px of bar.
+// The pair sits a little above mid-height so the lower bar clears the tagline
+// locked up at 50% + 60px.
+const BAR_GAP = 80;
+const BAR_LEN = 216;
+const BAR_LIFT = 12; // pair centre above hero mid-height
+
+// The glyph's two hooks, branching off the seam: the top one curves away to
+// the right above the bars, the bottom one mirrors it to the left below. Each
+// starts on the seam tangent to it, so it reads as the line itself bending —
+// a quarter-arc into a short horizontal terminal, like the ƒ's own ends.
+const HOOK_FROM = 95; // where the hook leaves the seam, from the pair centre
+const HOOK_R = 60;    // radius of the quarter-arc
+const HOOK_TAIL = 35; // straight run after the bend, before the round cap
+
+// The tagline sits at the seam's midpoint. Running the wave from y = 0 left the
+// seam wherever the swell happened to be at that height (12px left of centre on
+// a 375×812 phone), which threw the whole lockup off to one side. Anchoring the
+// wave's zero crossing at the hero's mid-height means the seam is dead centre
+// exactly where the lockup sits, so it is centred and still genuinely on the
+// line rather than pinned beside it.
 //
 // Read from the hero on every call rather than cached, so buildFlowLine can't
 // pick up a stale phase if it happens to run before a repaint.
@@ -38,7 +52,11 @@ const hero = document.querySelector('.ihero');
 const heroWater = document.getElementById('ihero-water');
 const heroSeam = document.getElementById('ihero-seam');
 const heroSeamPath = document.getElementById('ihero-seam-path');
-const heroBadge = document.getElementById('ihero-badge');
+const heroBarA = document.getElementById('ihero-bar-a');
+const heroBarB = document.getElementById('ihero-bar-b');
+const heroHookR = document.getElementById('ihero-hook-r');
+const heroHookL = document.getElementById('ihero-hook-l');
+const heroStem = document.getElementById('ihero-stem');
 const heroTagline = document.getElementById('ihero-tagline');
 
 function paintHero() {
@@ -86,11 +104,48 @@ function paintHero() {
   heroSeam.setAttribute('viewBox', `0 0 ${w} ${h}`);
   heroSeamPath.setAttribute('d', `M${points.join('L')}`);
 
-  // The badge and the tagline locked up under it ride the wave too, or they
-  // would drift off the line.
-  const badgeX = splitX + waveOffset(h / 2);
-  heroBadge.style.left = `${badgeX}px`;
-  heroTagline.style.left = `${badgeX}px`;
+  // Each bar is centred on the seam at its own height, so both visibly cross
+  // the line even when the swell has carried it off centre.
+  const barY = (offset) => h / 2 - BAR_LIFT + offset;
+  [[heroBarA, barY(-BAR_GAP / 2)], [heroBarB, barY(BAR_GAP / 2)]].forEach(([bar, y]) => {
+    if (!bar) return;
+    const cx = splitX + waveOffset(y);
+    bar.setAttribute('d', `M${(cx - BAR_LEN / 2).toFixed(2)},${y.toFixed(2)}L${(cx + BAR_LEN / 2).toFixed(2)},${y.toFixed(2)}`);
+  });
+
+  // Each hook starts on the seam moving along it, so the join is invisible:
+  // up and off to the right above the bars, down and off to the left below.
+  const pc = h / 2 - BAR_LIFT;
+
+  // The stem retraces the seam's own wave between the two branch points, so
+  // hooks, stem and bars join into one continuous blue ƒ over the pale rule.
+  if (heroStem) {
+    const stemPts = [];
+    for (let y = pc - HOOK_FROM; y < pc + HOOK_FROM; y += 4) {
+      stemPts.push(`${(splitX + waveOffset(y)).toFixed(2)},${y.toFixed(2)}`);
+    }
+    stemPts.push(`${(splitX + waveOffset(pc + HOOK_FROM)).toFixed(2)},${(pc + HOOK_FROM).toFixed(2)}`);
+    heroStem.setAttribute('d', `M${stemPts.join('L')}`);
+  }
+  if (heroHookR) {
+    const y = pc - HOOK_FROM;
+    const x = splitX + waveOffset(y);
+    heroHookR.setAttribute('d',
+      `M${x.toFixed(2)},${y.toFixed(2)}` +
+      `A${HOOK_R} ${HOOK_R} 0 0 1 ${(x + HOOK_R).toFixed(2)},${(y - HOOK_R).toFixed(2)}` +
+      `L${(x + HOOK_R + HOOK_TAIL).toFixed(2)},${(y - HOOK_R).toFixed(2)}`);
+  }
+  if (heroHookL) {
+    const y = pc + HOOK_FROM;
+    const x = splitX + waveOffset(y);
+    heroHookL.setAttribute('d',
+      `M${x.toFixed(2)},${y.toFixed(2)}` +
+      `A${HOOK_R} ${HOOK_R} 0 0 1 ${(x - HOOK_R).toFixed(2)},${(y + HOOK_R).toFixed(2)}` +
+      `L${(x - HOOK_R - HOOK_TAIL).toFixed(2)},${(y + HOOK_R).toFixed(2)}`);
+  }
+
+  // The tagline rides the wave too, or it would drift off the line.
+  heroTagline.style.left = `${splitX + waveOffset(h / 2)}px`;
 }
 
 if (hero && heroWater) {

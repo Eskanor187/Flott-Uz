@@ -1692,47 +1692,49 @@ h3 {
   to { stroke-dashoffset: -22; }
 }
 
-/* The newer frame has structure the earlier flat gradient didn't: a big light
-   disc sitting in the card's top-left corner, over a pale blue field. Two
-   gradients draw it — no image needed, and it scales with the card instead of
-   being pinned to one size.
-
-   Proportions are taken off the design's 416×453 card: radius and padding are
-   both ~7.7% of the width. */
+/* The latest frame recomposes the card around its centre line: a soft light
+   dome crowns the top-centre of a pale blue field (the old frame parked a
+   hard-edged disc in the top-left corner), and the type sits centred under it.
+   Two gradients draw the field — no image needed, and it scales with the card
+   instead of being pinned to one size. */
 .merge-card {
   position: absolute;
   z-index: 1;
   width: var(--mcw);
-  /* All three are one box — 416×453 in the design. Without this the card is
-     sized by its content, so a longer line of copy or a taller render (the
-     three PNGs differ: 223×256, 256×255, 241×256) makes one card bigger than
-     its neighbours. */
+  /* All three are one box. Without this the card is sized by its content, so a
+     longer line of copy or a taller render (the three PNGs differ: 957×1096,
+     991×986, 987×1047) makes one card bigger than its neighbours. The ratio
+     stays the animation's own — the frame's slightly taller card would ride
+     the row up into the flott mark before the merge. */
   aspect-ratio: 416 / 453;
-  /* Фон из макета: большой светлый круг, посаженный в левый верхний угол
-     карточки, на бледно-синем поле. Радиус в процентах, а не в пикселях, —
-     иначе круг «съезжает» вместе с шириной карточки. Край чуть размыт (97 →
-     100%), как в исходнике: он читается, но не режет глаз. */
+  /* Купол света по центру верха — с читаемой кромкой, как в макете: дуга
+     видна, а не растворяется. Геометрия снята с макета: по центру купол
+     доходит до ~52% высоты карточки, у боковых краёв — до ~35%. Внутри купол
+     чуть темнеет к кромке, поле под ним темнеет к низу. */
   background:
-    radial-gradient(ellipse 82% 78% at 0% 0%,
-      #f7faff 0 98%, rgba(247, 250, 255, 0) 100%),
-    linear-gradient(145deg, #cddcf9 0%, #b9cef2 100%);
-  border-radius: 22px;
-  padding: 22px 22px 0;
+    radial-gradient(ellipse 68% 52% at 50% 0%,
+      #f7fbff 0%, #eef4ff 85%, rgba(238, 244, 255, 0) 99%),
+    linear-gradient(180deg, #d0ddf8 0%, #b7ccf2 100%);
+  /* Скругление в макете заметно крупнее прежнего: ~13% ширины карточки */
+  border-radius: clamp(28px, 12%, 36px);
+  padding: 24px 22px 0;
   display: flex;
   flex-direction: column;
   gap: 8px;
   will-change: transform, opacity;
 }
 
-/* Размеры сняты с макета (416×453): заголовок — 8.4% ширины карточки, текст —
-   5.3%, поэтому заданы в процентах, а не в rem. Цвета оттуда же: #1052F2 у
-   заголовка и тёмно-синий #0A3599 у текста — он выглядит синим, но это не
-   фирменный синий. */
-/* Текст держится внутри светлого круга: у макета блок занимает 56% ширины
-   карточки (234 из 416), и на этой ширине строки не доходят до дуги. Во всю
-   ширину они выезжали на синее поле. */
+/* Заголовок #1052F2 и тёмно-синий #0A3599 у текста — из макета (он выглядит
+   синим, но это не фирменный синий). Обе строки центрованы, текст держится
+   чуть у́же карточки, чтобы переносился в три строки, как в макете. */
 .merge-card h3,
-.merge-card p { max-width: 56%; }
+.merge-card p {
+  max-width: none;
+  margin-inline: auto;
+  text-align: center;
+}
+
+.merge-card p { max-width: 84%; }
 
 .merge-card h3 {
   font-size: clamp(1.25rem, 8.4%, 1.6rem);
@@ -1754,17 +1756,19 @@ h3 {
 .mc-left { left: 0; bottom: 5%; }
 .mc-right { right: 0; bottom: 5%; }
 
-/* In the design the render is ~80% of the card's width and deliberately hangs
-   past its bottom edge — about a quarter of the card's height sticks out below.
-   The negative margin is a percentage, which resolves against the card's WIDTH,
-   so -26% ≈ the 111px overhang the design has on a 416px card. */
+/* In the latest frame the render lives inside the card — bottom-anchored at
+   ~74% of the card's width, with only its pedestal's shadow slipping past the
+   rounded edge, not the quarter-height overhang the old frame had. Our card is
+   wider and shorter than the frame's, so ~66% of its full width matches the
+   frame's render-to-card height ratio; the percentage resolves against the
+   content box (width minus the 22px side paddings), hence 78%. */
 .role-pic {
-  width: 88%;
+  width: 78%;
   height: auto;
   align-self: center;
-  /* `auto` on top pins the render to the card's bottom edge, so all three hang
-     past it by the same amount however tall the render itself is. */
-  margin: auto auto -26%;
+  /* `auto` on top pins the render to the card's bottom edge, so any overflow
+     is the same on all three however tall the render itself is. */
+  margin: auto auto -4%;
   /* Lit from above, so a soft contact shadow sits it on the card. */
   filter: drop-shadow(0 12px 16px rgba(18, 48, 158, 0.24));
 }
@@ -3322,30 +3326,8 @@ h3 {
   pointer-events: none;
 }
 
-/* left is set from the wave in script.js so the badge stays on the line */
-
-.ihero-badge {
-  position: absolute;
-  top: 50%;
-  z-index: 4;
-  width: 92px;
-  height: 92px;
-  border-radius: 50%;
-  overflow: hidden;
-  transform: translate(-50%, -50%);
-  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.6), 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-}
-
-.ihero-badge img {
-  display: block;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transform: scale(1.05);
-}
-
-/* Headline sits above the badge; the tagline locks up under it on the seam,
-   in the same white but held back so it reads as secondary. */
+/* Headline sits above the seam's bars; the tagline locks up under them on the
+   seam, in the same white but held back so it reads as secondary. */
 
 .ihero-head {
   position: absolute;
