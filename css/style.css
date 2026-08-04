@@ -564,8 +564,18 @@ h3 {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: center;
-  pointer-events: none;
+  /* Подписи впечатаны в низ снимков — кадрируем выше, как в макете */
+  object-position: center 24%;
+}
+
+/* На снимке United Ventures подпись впечатана поперёк нижней трети, и никакой
+   кроп в пропорциях макета её не убирает — поэтому кадр приближен. Временно:
+   с чистым снимком это правило не нужно. */
+.backing-shot-zoom {
+  /* Кадр показывает верхние ~69% снимка: подпись начинается на 72% и в него
+   не попадает. Через высоту, а не transform, — иначе снимок не знает границ. */
+  height: 143%;
+  object-position: center top;
 }
 
 /* Set by script.js when the render is too small to fill a tall card at a
@@ -1221,9 +1231,13 @@ h3 {
   min-width: 0;
 }
 
+/* Шапка кабинета залита синим, а .cab задаёт чёрный цвет текста — приветствие
+   наследовало его и читалось тёмным пятном на синем. Ставим белый явно. */
 .cab-hi {
   font-size: 1.05rem;
+  color: white;
   font-weight: 600;
+  color: var(--white);
   white-space: nowrap;
 }
 
@@ -1620,7 +1634,11 @@ h3 {
 
 /* ---------- Merge scene (три стороны → flott) ---------- */
 
-.merge-scene { height: 380vh; margin-top: 12px; }
+/* Белая подложка: странице сквозь всю сцену слияния идёт синяя нить
+   (.flow-line, z-index: -1), и во время пина она резала анимацию — проходила
+   через логотип, провода и подписи. Фон в цвет страницы прячет её за сценой,
+   как её прячут белые карточки в других секциях. */
+.merge-scene { height: 380vh; margin-top: 12px; background: var(--white); }
 
 .merge-sticky {
   position: sticky;
@@ -1695,7 +1713,7 @@ h3 {
      иначе круг «съезжает» вместе с шириной карточки. Край чуть размыт (97 →
      100%), как в исходнике: он читается, но не режет глаз. */
   background:
-    radial-gradient(ellipse 80% 74% at 0% 0%,
+    radial-gradient(ellipse 82% 78% at 0% 0%,
       #f7faff 0 98%, rgba(247, 250, 255, 0) 100%),
     linear-gradient(145deg, #cddcf9 0%, #b9cef2 100%);
   border-radius: 22px;
@@ -1710,6 +1728,12 @@ h3 {
    5.3%, поэтому заданы в процентах, а не в rem. Цвета оттуда же: #1052F2 у
    заголовка и тёмно-синий #0A3599 у текста — он выглядит синим, но это не
    фирменный синий. */
+/* Текст держится внутри светлого круга: у макета блок занимает 56% ширины
+   карточки (234 из 416), и на этой ширине строки не доходят до дуги. Во всю
+   ширину они выезжали на синее поле. */
+.merge-card h3,
+.merge-card p { max-width: 56%; }
+
 .merge-card h3 {
   font-size: clamp(1.25rem, 8.4%, 1.6rem);
   font-weight: 700;
@@ -1735,7 +1759,7 @@ h3 {
    The negative margin is a percentage, which resolves against the card's WIDTH,
    so -26% ≈ the 111px overhang the design has on a 416px card. */
 .role-pic {
-  width: 80%;
+  width: 88%;
   height: auto;
   align-self: center;
   /* `auto` on top pins the render to the card's bottom edge, so all three hang
@@ -1887,7 +1911,11 @@ h3 {
 /* Stacked, the cards are in normal flow, so a render hanging past the bottom
    edge would land on the card below it. Here it stays inside. */
 .merge-scene.static .merge-card { padding-bottom: 22px; }
-.merge-scene.static .role-pic { width: 62%; margin: 6px auto 0; }
+/* Карточка на телефоне широкая и низкая — круг накрывает её почти целиком,
+   так что держать текст в 58% незачем */
+.merge-scene.static .merge-card h3,
+.merge-scene.static .merge-card p { max-width: none; }
+.merge-scene.static .role-pic { width: 68%; margin: 6px auto 0; }
 .merge-scene.static .merge-center {
   position: static;
   transform: none !important;
@@ -2177,166 +2205,279 @@ h3 {
 
 /* ---------- Dark (live) section ---------- */
 
-.section-dark {
-  background: var(--black);
-  color: var(--white);
-  border-radius: clamp(28px, 4vw, 48px);
-  width: min(1400px, 100% - 24px);
-  margin-inline: auto;
+
+
+/* ---------- Results, on the blue field ---------- */
+
+/* The frame paints this section as a full-bleed render — the blue petal photo,
+   blurred, with the two plus-lighter glows baked in — so the gradients that
+   stood in for it are gone, and so is the inset rounded plate they sat on. */
+/* В макете надзаголовок здесь обычным регистром, а не капсом, как в светлых
+   секциях */
+.section-blue .eyebrow-light {
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: clamp(0.95rem, 1.3vw, 1.08rem);
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.92);
 }
+
+.section-blue {
+  color: var(--white);
+  /* Снимок лежит краем в край, поэтому фон — на самой секции, а не на вложенной
+     плашке. #1052f2 из макета остаётся подложкой, пока грузится картинка. */
+  background: #1052f2 url("../assets/img/results-bg.jpg") center / cover no-repeat;
+  /* Полосе во всю ширину нужны поля больше общих: в кадре это 176px на 1920 */
+  padding-block: clamp(96px, 12vw, 176px);
+}
+
+/* Полоса во всю ширину, поэтому колонка контента здесь шире общей: в кадре она
+   1317px на 1920px, а не 1200px, как в светлых секциях на белом. */
+.section-blue > .container { width: min(1320px, 100% - 48px); }
+
+/* Left column carries the three cards, right column the deal cycle */
+.live-layout {
+  display: grid;
+  grid-template-columns: 49.4% 1fr;
+  gap: 2.6%;
+  align-items: start;
+  margin-top: clamp(36px, 4vw, 60px);
+}
+
+.live-col { display: grid; gap: 16px; }
 
 .live-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 18px;
-  margin-top: 60px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
 }
 
+/* White cards on the blue, per the frame — not the translucent panels the
+   near-black section used. */
 .live-card {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.10);
-  border-radius: var(--r-md);
-  padding: 34px 30px;
+  background: var(--white);
+  border-radius: 28px;
+  padding: 28px 32px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  transition: transform 0.45s var(--ease), background 0.45s var(--ease);
+  gap: 10px;
+  transition: transform 0.45s var(--ease);
 }
 
-.live-card:hover { transform: translateY(-6px); background: rgba(255, 255, 255, 0.08); }
+.live-card:hover { transform: translateY(-6px); }
 
 .live-kicker {
-  font-size: 0.78rem;
-  font-weight: 700;
+  font-size: 0.92rem;
+  font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.12em;
-  color: #8fadff;
+  letter-spacing: 0.1em;
+  color: #1052f2;
 }
 
-.live-card h3 { font-size: 1.6rem; letter-spacing: -0.02em; }
+.live-card h3 {
+  /* Верх подняли под кадр (30,9px на 1920), нижнюю границу оставили прежней —
+     на телефоне заголовку карточки крупнее не нужно */
+  font-size: clamp(1.35rem, 2.3vw, 1.93rem);
+  /* Общий интерлиньяж h3 растил карточку на полтора десятка пикселей против
+     кадра — название здесь всегда в одну строку, ему хватает 1,2 */
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  color: #1052f2;
+}
 
-.live-text { color: rgba(255, 255, 255, 0.66); font-size: 0.98rem; }
+/* The copy sits low in the card in the frame, with a gap above it */
+.live-text {
+  margin-top: auto;
+  padding-top: 14px;
+  color: #1052f2;
+  font-size: 0.88rem;
+  line-height: 1.4;
+}
 
-.live-card-accent { background: var(--blue); border-color: var(--blue); }
-.live-card-accent:hover { background: var(--blue-deep); }
-.live-card-accent .live-kicker { color: var(--blue-text-on); }
-.live-card-accent .live-text { color: rgba(255, 255, 255, 0.85); }
+.live-card-accent {
+  --live-badge-w: min(34.5%, 224px);
+  position: relative;
+  background: #1052f2;
+  border: 1px solid rgba(255, 255, 255, 0.45);
+  /* Место под значок справа: он занимает 34,5% ширины карточки, ещё 5% —
+     воздух до текста, иначе строки уходят под него */
+  padding-right: calc(var(--live-badge-w) + 5%);
+  padding-left: 40px;
+  padding-block: 32px;
+}
 
+/* Свешивается за верх и низ карточки, поэтому не режется её радиусом и стоит
+   по центру высоты — как в макете (224×245 при карточке 650×200). */
+.live-badge {
+  position: absolute;
+  top: 50%;
+  right: 2%;
+  width: var(--live-badge-w);
+  height: auto;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+.live-card-accent:hover { background: #0d46d8; }
+.live-card-accent .live-kicker,
+.live-card-accent h3 { color: var(--white); }
+.live-card-accent .live-text { color: rgba(255, 255, 255, 0.88); }
+
+/* Deal cycle: an outlined panel holding five pills — four in a 2×2, the last
+   spanning the width. */
 .pipeline {
-  margin-top: 56px;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.10);
-  border-radius: var(--r-lg);
-  padding: clamp(24px, 4vw, 40px);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  border-radius: 28px;
+  padding: clamp(24px, 2.6vw, 38px);
+}
+
+.pipeline-title {
+  font-size: clamp(1.02rem, 1.4vw, 1.21rem);
+  font-weight: 500;
+  color: var(--white);
+  margin-bottom: 32px;
+}
+
+/* Столбцы и строки разведены по-разному — так они и стоят в кадре */
+.pipeline-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 15px;
+  row-gap: 18px;
+}
+
+.pipe {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 82px;
+  padding: 14px 18px;
+  background: var(--white);
+  border-radius: 13px;
+  color: #1052f2;
+  font-weight: 600;
+  font-size: clamp(1.02rem, 1.35vw, 1.21rem);
+  line-height: 1.25;
+  text-align: center;
+}
+
+/* The last step is the outcome, so it reads as a filled bar across the panel */
+.pipe-wide {
+  grid-column: 1 / -1;
+  min-height: 66px;
+  margin-top: 4px;
+  background: #1052f2;
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  color: var(--white);
 }
 
 /* ---------- Инвестиции ---------- */
 
-.backing { margin-top: 56px; }
-
-.backing-kicker {
-  font-size: 0.95rem;
-  font-weight: 600;
-  color: #8fadff;
-  margin-bottom: 24px;
-}
-
 .backing-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 18px;
+  gap: 22px;
+  margin-top: 26px;
 }
 
 .backing-card {
   display: flex;
   flex-direction: column;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.10);
   border-radius: var(--r-md);
   overflow: hidden;
-  transition: transform 0.45s var(--ease), background 0.45s var(--ease);
+  transition: transform 0.45s var(--ease);
 }
 
-.backing-card:hover { transform: translateY(-6px); background: rgba(255, 255, 255, 0.08); }
+.backing-card:hover { transform: translateY(-6px); }
 
 /* The two shots are different shapes — one portrait, one landscape — so they
    run through a fixed frame rather than at their own ratios, or the pair sits
    at wildly different heights. */
+/* Кадр, который держит кроп: у зумленного снимка иначе нет границ и он
+   наезжает на синюю плашку */
+/* Рамка выше, чем была: в 16:9 оба снимка резались поперёк людей. 4:3 даёт
+   портретному кадру показать группу целиком — карточка просто становится
+   крупнее. */
+.backing-figure {
+  display: block;
+  overflow: hidden;
+  aspect-ratio: 4 / 3;
+}
+
 .backing-shot {
   display: block;
   width: 100%;
-  /* height: auto is load-bearing — the width/height attributes on the <img>
-     are presentational hints that set CSS height, which would otherwise win
-     over aspect-ratio and render each shot at its full intrinsic height. */
-  height: auto;
-  aspect-ratio: 16 / 10;
+  height: 100%;
   object-fit: cover;
-  object-position: center;
+  /* Портретный снимок в широкой рамке: 55% ставит окно на людей, минуя
+     шапку сверху и подпись снизу */
+  /* Окно 60% высоты портретного снимка: 44% ставит его на людей, выше
+     впечатанной подписи внизу */
+  object-position: center 40%;
 }
 
+/* У портретного снимка впечатаны и шапка сверху, и подпись снизу — между ними
+   остаётся узкая полоса. Зум сужает окно кадра до неё, рамка режет остальное.
+   Второй снимок кадрируется по-своему (ниже), поэтому :not(). Оба правила
+   временные — с чистыми снимками они не нужны. */
+.backing-shot:not(.backing-shot-zoom) {
+  transform: scale(1.28);
+}
+
+/* Подпись впечатана поперёк нижней трети этого снимка, и никакой кроп в
+   пропорциях макета её не убирает. Кадр показывает верхние ~69%: снимок выше
+   рамки, прижат к её верху, лишнее срезает .backing-figure. Правило нужно
+   только до тех пор, пока не появится чистый снимок. */
+.backing-shot-zoom {
+  height: 143%;
+  object-position: center top;
+}
+
+/* Blue plate under the photo: amount and fund left, the note set right */
 .backing-body {
-  padding: 26px 30px 30px;
   display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.backing-sum {
-  font-size: clamp(1.9rem, 3vw, 2.5rem);
-  font-weight: 700;
-  line-height: 1;
-  letter-spacing: -0.03em;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 22px 26px 24px;
+  background: #1052f2;
   color: var(--white);
 }
 
-.backing-card h3 { font-size: 1.15rem; color: #8fadff; }
-
-.backing-note { color: rgba(255, 255, 255, 0.66); font-size: 0.95rem; }
-
-/* Keyboard focus needs a marker on the dark ground — the cards are anchors */
-.backing-card:focus-visible {
-  outline: 2px solid #8fadff;
-  outline-offset: 3px;
-}
-
-.pipeline-title {
-  font-size: 0.95rem;
-  font-weight: 600;
-  color: #8fadff;
-  margin-bottom: 24px;
-}
-
-.pipeline-track {
-  display: flex;
-  align-items: stretch;
-  gap: 12px;
-  flex-wrap: wrap;
-}
-
-.pipe {
-  flex: 1 1 150px;
-  background: var(--blue);
-  border-radius: var(--r-sm);
-  padding: 16px 18px;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  font-weight: 600;
-  font-size: 0.98rem;
-  letter-spacing: -0.01em;
-}
-
-.pipe small {
-  font-size: 0.8rem;
-  font-weight: 500;
-  color: var(--blue-text-on);
-}
-
-.pipeline-track i {
-  font-style: normal;
-  align-self: center;
-  color: rgba(255, 255, 255, 0.4);
+.backing-sum {
+  font-size: clamp(1.7rem, 2.6vw, 2.15rem);
   font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.03em;
+}
+
+.backing-card h3 {
+  font-size: clamp(1rem, 1.5vw, 1.2rem);
+  font-weight: 600;
+  margin-top: 6px;
+}
+
+.backing-note {
+  flex: 0 1 40%;
+  text-align: right;
+  font-size: 0.76rem;
+  line-height: 1.3;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.backing-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 26px;
+}
+
+.backing-cta svg { width: 22px; height: 22px; fill: rgba(255, 255, 255, 0.25); }
+
+/* Keyboard focus needs a marker — the cards are anchors */
+.backing-card:focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: 3px;
 }
 
 /* ---------- Security ---------- */
@@ -2655,8 +2796,10 @@ h3 {
      Так карточка не шире того, во что её положили. */
   .feature-row,
   .security-grid,
-  .live-grid,
   .ai-grid { grid-template-columns: minmax(0, 1fr); gap: clamp(28px, 5vw, 44px); }
+
+  /* Две колонки результатов не живут уже 1024px — складываем их */
+  .live-layout { grid-template-columns: minmax(0, 1fr); gap: 18px; }
 
   .feature-row-flip .feature-copy { order: 1; }
   .feature-row-flip .feature-visual { order: 2; }
@@ -2849,6 +2992,15 @@ h3 {
         rgba(6, 26, 102, 0.95) 100%
       ),
       url("../assets/img/ai-hands.jpg");
+  }
+
+  /* Поля кадра рядом со значком «Пилот бесплатно» здесь съедали колонку текста:
+     на 390px под строки оставалось 167px, и заголовок карточки ломался
+     посередине. Значок ужимаем, отступы — тоже. */
+  .live-card-accent {
+    --live-badge-w: 26%;
+    padding-left: 24px;
+    padding-right: calc(var(--live-badge-w) + 4%);
   }
 
   /* Имя и Email тоже в одну колонку — вдвоём они здесь уже не читаются */

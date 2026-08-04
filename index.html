@@ -111,7 +111,7 @@
                чем начинается сама трансформация -->
           <div class="morph-head">
             <p class="eyebrow reveal">Что меняет Flott</p>
-            <h2 class="reveal d1">Счёт-фактура превращается в деньги с FLott.</h2>
+            <h2 class="reveal d1">Счёт-фактура превращается в деньги с Flott.</h2>
             <p class="section-sub reveal d2" id="morphSub">Тот&nbsp;же счёт №&nbsp;FL-4412 — просто пролистайте.</p>
           </div>
           <div class="morph-card" id="morphCard">
@@ -172,7 +172,7 @@
        the CSS below is the sensible cover-and-centre it starts from. -->
   <img class="ai-bg" src="assets/img/ai-hands.jpg" alt="" aria-hidden="true">
   <div class="container">
-    <p class="eyebrow eyebrow-light reveal">Flott AI</p>
+    <p class="eyebrow eyebrow-light reveal">flott AI</p>
     <h2 class="reveal d1">Искусственный интеллект<br>внутри каждой сделки.</h2>
     <p class="section-sub reveal d2">Flott читает денежные потоки и&nbsp;счета-фактуры —
       и&nbsp;подсказывает каждой стороне следующий шаг.</p>
@@ -242,20 +242,20 @@
           <div class="merge-card mc-top">
             <h3>Банк-фактор</h3>
             <p>Финансирует сделки, видит риск и&nbsp;портфель целиком.</p>
-            <img class="role-pic" src="assets/img/role-bank.png" alt="" aria-hidden="true"
-              width="223" height="256" loading="lazy" decoding="async">
+            <img class="role-pic" src="assets/img/Banks.png" alt="" aria-hidden="true"
+              width="957" height="1096" loading="lazy" decoding="async">
           </div>
           <div class="merge-card mc-left">
             <h3>Поставщики</h3>
             <p>Превращают неоплаченные счета в&nbsp;деньги сегодня.</p>
-            <img class="role-pic" src="assets/img/role-supplier.png" alt="" aria-hidden="true"
-              width="256" height="255" loading="lazy" decoding="async">
+            <img class="role-pic" src="assets/img/Suppliers.png" alt="" aria-hidden="true"
+              width="991" height="986" loading="lazy" decoding="async">
           </div>
           <div class="merge-card mc-right">
             <h3>Покупатели</h3>
             <p>Сохраняют отсрочку, подтверждают сделки в&nbsp;два клика.</p>
-            <img class="role-pic" src="assets/img/role-buyer.png" alt="" aria-hidden="true"
-              width="241" height="256" loading="lazy" decoding="async">
+            <img class="role-pic" src="assets/img/Clients.png" alt="" aria-hidden="true"
+              width="987" height="1047" loading="lazy" decoding="async">
           </div>
           <div class="merge-center">
             <div class="merge-logo">
@@ -594,74 +594,97 @@
 </section>
 
 <!-- ===== Live / traction ===== -->
-<section class="section section-dark" id="live">
+<!-- ===== Live / results ===== -->
+<!-- Two columns per the design frame: the three proof cards on the left, the
+     deal-cycle panel on the right, over the blue field. -->
+<section class="section section-blue" id="live">
   <div class="container">
     <p class="eyebrow eyebrow-light reveal">Результаты</p>
     <h2 class="reveal d1">Уже в реальной работе —<br>не&nbsp;демо и&nbsp;не&nbsp;пилот.</h2>
 
-    <div class="live-grid">
-      <div class="live-card reveal">
-        <p class="live-kicker">Банк</p>
-        <h3>Turonbank</h3>
-        <p class="live-text">Единое окно: подключение → аккредитация → аналитика → риск-контроль.</p>
+    <div class="live-layout">
+      <div class="live-col">
+        <div class="live-grid">
+          <div class="live-card reveal">
+            <p class="live-kicker">Банк</p>
+            <h3>Turonbank</h3>
+            <p class="live-text">Единое окно: подключение → аккредитация → аналитика → риск-контроль.</p>
+          </div>
+          <div class="live-card reveal d1">
+            <p class="live-kicker">МФО</p>
+            <h3>Turon Faktoring</h3>
+            <p class="live-text">Сделки полного цикла: привлечение клиента → скоринг и лимиты → документооборот → выплата.</p>
+          </div>
+        </div>
+        <div class="live-card live-card-accent reveal d2">
+          <p class="live-kicker">Прозрачная модель</p>
+          <h3>Пилот — бесплатно</h3>
+          <p class="live-text">Гибкая оплата: абонентская плата за платформу и/или комиссия от профинансированного объёма.</p>
+          <!-- Значок стоит у правого края карточки и свешивается за неё сверху
+               и снизу — так он и стоит в макете -->
+          <img class="live-badge" src="assets/img/pilot-free.png" alt=""
+            width="998" height="1091" loading="lazy" decoding="async">
+        </div>
       </div>
-      <div class="live-card reveal d1">
-        <p class="live-kicker">МФО</p>
-        <h3>Turon Faktoring</h3>
-        <p class="live-text">Сделки полного цикла: привлечение клиента → скоринг и лимиты → документооборот → выплата.</p>
-      </div>
-      <div class="live-card live-card-accent reveal d2">
-        <p class="live-kicker">Прозрачная модель</p>
-        <h3>Пилот — бесплатно</h3>
-        <p class="live-text">Гибкая оплата: абонентская плата за платформу и/или комиссия от профинансированного объёма.</p>
+
+      <div class="pipeline reveal d3">
+        <p class="pipeline-title">Полный цикл сделки — уже в работе</p>
+        <div class="pipeline-grid">
+          <span class="pipe">Привлечение из клиентов</span>
+          <span class="pipe">Аккредитация и лимиты</span>
+          <span class="pipe">Скоринг риск-балл</span>
+          <span class="pipe">ЭДО подпись договора</span>
+          <span class="pipe pipe-wide">Отчёты ЦБ, банк</span>
+        </div>
       </div>
     </div>
+  </div>
+</section>
 
-    <div class="pipeline reveal d3">
-      <p class="pipeline-title">Полный цикл сделки — уже в работе</p>
-      <div class="pipeline-track">
-        <span class="pipe">Привлечение<small>из клиентов</small></span>
-        <i>→</i>
-        <span class="pipe">Аккредитация<small>и лимиты</small></span>
-        <i>→</i>
-        <span class="pipe">Скоринг<small>риск-балл</small></span>
-        <i>→</i>
-        <span class="pipe">ЭДО<small>подпись договора</small></span>
-        <i>→</i>
-        <span class="pipe">Отчёты<small>ЦБ, банк</small></span>
-      </div>
-    </div>
-
-    <!-- Инвестиции. Суммы вынесены в текст, а не оставлены внутри картинок:
-         на снимках они набраны по-узбекски, и в JPEG их не прочитает ни поиск,
-         ни скринридер. -->
-    <div class="backing">
-      <p class="backing-kicker reveal">Инвестиции</p>
-      <div class="backing-grid">
-        <a class="backing-card reveal" href="https://www.aloqaventures.uz/news/zlg97hg3s1-aloqaventures-invested-50000-in-flott"
-          target="_blank" rel="noopener noreferrer">
+<!-- ===== Investments ===== -->
+<!-- Its own light section now, per the frame: photo over a blue plate that
+     carries the amount and the fund, with the note set right. Суммы вынесены
+     в текст, а не оставлены внутри картинок — на снимках они набраны
+     по-узбекски, и в JPEG их не прочитает ни поиск, ни скринридер. -->
+<section class="section" id="backing">
+  <div class="container">
+    <p class="eyebrow reveal">Инвестиции</p>
+    <div class="backing-grid">
+      <a class="backing-card reveal" href="https://www.aloqaventures.uz/news/zlg97hg3s1-aloqaventures-invested-50000-in-flott"
+        target="_blank" rel="noopener noreferrer">
+        <span class="backing-figure">
           <img class="backing-shot" src="assets/img/aloqa_ventures.jpg"
             alt="Команда Flott и фонда AloqaVentures после подписания инвестиции"
             width="1024" height="1280" loading="lazy" decoding="async">
-          <div class="backing-body">
+        </span>
+        <div class="backing-body">
+          <div class="backing-who">
             <p class="backing-sum">$50 000</p>
             <h3>AloqaVentures</h3>
-            <p class="backing-note">Фонд проинвестировал Flott</p>
           </div>
-        </a>
-        <a class="backing-card reveal d1" href="https://t.me/pivotuzbekistan/3165"
-          target="_blank" rel="noopener noreferrer">
-          <img class="backing-shot" src="assets/img/united_ventures.jpg"
+          <p class="backing-note">Фонд про­инвестировал Flott</p>
+        </div>
+      </a>
+      <a class="backing-card reveal d1" href="https://t.me/pivotuzbekistan/3165"
+        target="_blank" rel="noopener noreferrer">
+        <span class="backing-figure">
+          <img class="backing-shot backing-shot-zoom" src="assets/img/united_ventures.jpg"
             alt="Команда Flott и фонда United Ventures после подписания инвестиции"
             width="1920" height="1280" loading="lazy" decoding="async">
-          <div class="backing-body">
+        </span>
+        <div class="backing-body">
+          <div class="backing-who">
             <p class="backing-sum">$27 000</p>
             <h3>United Ventures</h3>
-            <p class="backing-note">Инвестиции в финтех-стартап Flott</p>
           </div>
-        </a>
-      </div>
+          <p class="backing-note">Инвестиции в финтех-стартап Flott</p>
+        </div>
+      </a>
     </div>
+    <a class="btn btn-primary backing-cta magnetic reveal d2" href="#cta">
+      Стать инвестором
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="11"/><path d="M10 8l4 4-4 4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </a>
   </div>
 </section>
 
@@ -765,7 +788,6 @@
     <div class="footer-top">
       <div class="footer-brand">
         <svg class="brand-mark" viewBox="0 0 1013 1770" aria-hidden="true">
-          <path d="M949.697 0.0201065C984.659 0.0257228 1013 28.379 1013 63.3526V189.394C1013 224.372 984.654 252.726 949.688 252.727H854.943C732.56 252.727 633.349 351.969 633.349 474.39V568.338H949.688C984.654 568.338 1013 596.693 1013 631.67V758.335C1013 793.312 984.654 821.667 949.688 821.668H633.349V885.744L633.178 948.332H949.688C984.654 948.333 1013 976.688 1013 1011.66V1138.33C1013 1173.31 984.654 1201.66 949.688 1201.66H632.499L632.161 1327.86C631.505 1572.27 433.233 1770.04 188.903 1770L63.3032 1769.98C28.3407 1769.97 0.00160728 1741.62 0.00154572 1706.65V1580.61C0.00154877 1545.63 28.3475 1517.27 63.314 1517.27H158.28C280.663 1517.27 379.875 1418.03 379.875 1295.61V1201.66H63.3125C28.346 1201.66 9.70286e-05 1173.31 0 1138.33V1011.66C3.05687e-06 976.687 28.346 948.332 63.3125 948.332H379.875V884.256L380.047 821.668H63.3125C28.346 821.668 0 793.313 0 758.335V631.67C6.69298e-08 596.693 28.346 568.338 63.3125 568.338H380.725L381.064 442.138C381.719 197.733 579.991 -0.039243 824.321 5.84083e-06L949.697 0.0201065Z" fill="currentColor"/>
         </svg>
         <span class="footer-word">flott</span>
       </div>
