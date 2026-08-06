@@ -52,28 +52,19 @@
       <video class="ihero-water" id="ihero-water" src="assets/video/water_flow.mp4"
              autoplay loop muted playsinline preload="auto" aria-hidden="true"></video>
 
-      <!-- The rule exists to hide the join between the still ice image and the
-           video, so it runs solid and unbroken — any fade would let the blend
-           show through. The two bars crossing it at its middle turn the seam
-           itself into the Flott mark — the ƒ is a double-curved stroke with
-           two horizontal bars, and here the seam plays the stroke. -->
+      <!-- The band exists to hide the join between the ice and the water, so
+           it runs solid and unbroken — any fade would let the blend show
+           through. Per "Comp 4" it is now a thick brand-blue ribbon; its
+           centre line is the CURVE spline in script.js. -->
       <svg class="ihero-seam" id="ihero-seam" preserveAspectRatio="none" aria-hidden="true">
-        <path id="ihero-seam-path" fill="none" stroke="#b3d3ea" stroke-width="54"
+        <path id="ihero-seam-path" fill="none" stroke="#1052f2" stroke-width="96"
               stroke-linejoin="round" stroke-linecap="round"></path>
-        <!-- The mark's own parts are brand blue; the seam they branch from
-             keeps the pale rule colour. The stem retraces the seam's wave
-             between the two hooks, joining everything into one ƒ. -->
-        <path id="ihero-stem" fill="none" stroke="#1052f2" stroke-width="54"
-              stroke-linejoin="round" stroke-linecap="round"></path>
-        <path id="ihero-bar-a" fill="none" stroke="#1052f2" stroke-width="54"
-              stroke-linecap="round"></path>
-        <path id="ihero-bar-b" fill="none" stroke="#1052f2" stroke-width="54"
-              stroke-linecap="round"></path>
-        <path id="ihero-hook-r" fill="none" stroke="#1052f2" stroke-width="54"
-              stroke-linecap="round"></path>
-        <path id="ihero-hook-l" fill="none" stroke="#1052f2" stroke-width="54"
-              stroke-linecap="round"></path>
       </svg>
+
+      <!-- The badged mark sits on the band's right reach, dead centre of the
+           viewport — position per "Comp 4". -->
+      <img class="ihero-badge" id="ihero-badge" src="assets/img/flott-badge.svg"
+           alt="" width="194" height="194" aria-hidden="true">
 
       <!-- Three lines, not two: «денежным потоком» set on one line is 571px
            wide and runs straight into the invoice card on the ice side. -->
@@ -83,10 +74,19 @@
         <span>потоком</span>
       </span>
 
+      <!-- The one sentence splits across the composition per "Comp 4": its
+           head sits top-left on the ice, its tail bottom-right on the water,
+           each half led by the serif accent line. -->
       <div class="ihero-head" id="hero-text">
         <h1 class="ihero-h1">
-          <span class="line">Превратите замороженный счет </span>
-          <span class="line serif-accent ihero-serif">в денежный поток</span>
+          <span class="ihero-h1-left">
+            <span class="line serif-accent ihero-serif">Превратите</span>
+            <span class="line">замороженный счет</span>
+          </span>
+          <span class="ihero-h1-right">
+            <span class="line serif-accent ihero-serif">в денежный</span>
+            <span class="line">поток</span>
+          </span>
         </h1>
       </div>
 
@@ -98,8 +98,9 @@
 <svg class="flow-line" id="flow-line" aria-hidden="true" preserveAspectRatio="none">
   <defs>
     <linearGradient id="flow-line-fade" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#b3d3ea"/>
-      <stop offset="0.015" stop-color="#9ec6e2"/>
+      <!-- Первые ступени — в цвет ленты героя: нить подхватывает её на сгибе -->
+      <stop offset="0" stop-color="#1052f2"/>
+      <stop offset="0.015" stop-color="#1550ea"/>
       <stop offset="0.05" stop-color="#2353e8" stop-opacity="0.9"/>
       <stop offset="0.85" stop-color="#2353e8" stop-opacity="0.75"/>
       <stop offset="1" stop-color="#2353e8" stop-opacity="0.35"/>
@@ -794,34 +795,64 @@
 </section>
 </main>
 
+<!-- Per the frame: a white rounded panel inset on the dark strip, brand and
+     tagline left, three link columns, socials with labels at the right, and a
+     ruled bottom row — copyright left, the legal links right. -->
 <footer class="site-footer">
-  <div class="container">
-    <div class="footer-top">
-      <div class="footer-brand">
-        <svg class="brand-mark" viewBox="0 0 1013 1770" aria-hidden="true">
-        </svg>
-        <span class="footer-word">flott</span>
+  <div class="footer-card">
+    <div class="footer-main">
+      <div class="footer-brand-block">
+        <div class="footer-brand">
+          <svg class="brand-mark" viewBox="0 0 1013 1770" aria-hidden="true">
+            <path d="M949.697 0.0201065C984.659 0.0257228 1013 28.379 1013 63.3526V189.394C1013 224.372 984.654 252.726 949.688 252.727H854.943C732.56 252.727 633.349 351.969 633.349 474.39V568.338H949.688C984.654 568.338 1013 596.693 1013 631.67V758.335C1013 793.312 984.654 821.667 949.688 821.668H633.349V885.744L633.178 948.332H949.688C984.654 948.333 1013 976.688 1013 1011.66V1138.33C1013 1173.31 984.654 1201.66 949.688 1201.66H632.499L632.161 1327.86C631.505 1572.27 433.233 1770.04 188.903 1770L63.3032 1769.98C28.3407 1769.97 0.00160728 1741.62 0.00154572 1706.65V1580.61C0.00154877 1545.63 28.3475 1517.27 63.314 1517.27H158.28C280.663 1517.27 379.875 1418.03 379.875 1295.61V1201.66H63.3125C28.346 1201.66 9.70286e-05 1173.31 0 1138.33V1011.66C3.05687e-06 976.687 28.346 948.332 63.3125 948.332H379.875V884.256L380.047 821.668H63.3125C28.346 821.668 0 793.313 0 758.335V631.67C6.69298e-08 596.693 28.346 568.338 63.3125 568.338H380.725L381.064 442.138C381.719 197.733 579.991 -0.039243 824.321 5.84083e-06L949.697 0.0201065Z" fill="currentColor"/>
+          </svg>
+          <span class="footer-word">flott</span>
+        </div>
+        <p class="footer-tagline">Преобразуйте B2B-платежи с&nbsp;мгновенным денежным потоком и&nbsp;нулевым кредитным риском.</p>
       </div>
-      <div class="footer-cols">
-        <div class="footer-col">
-          <p class="footer-col-title">Платформа</p>
-          <a href="#how">Как это работает</a>
-          <a href="#ai">Flott AI</a>
-          <a href="#roles">Возможности</a>
-          <a href="#live">Уже в работе</a>
-          <a href="#security">Безопасность</a>
-        </div>
-        <div class="footer-col">
-          <p class="footer-col-title">Контакты</p>
-          <a href="mailto:info@flott.uz">info@flott.uz</a>
-          <a href="https://flott.uz">flott.uz</a>
-          <span>Ташкент, Узбекистан</span>
-        </div>
+      <div class="footer-col">
+        <p class="footer-col-title">Продукт</p>
+        <a href="#ai">Аналитика</a>
+        <a href="#roles">Для финансистов</a>
+        <a href="#how">Как это работает</a>
+        <a href="#live">Цены</a>
+      </div>
+      <div class="footer-col">
+        <p class="footer-col-title">Компания</p>
+        <a href="#backing">О нас</a>
+        <a href="#cta">Контакты</a>
+        <a href="#security">FAQ</a>
+        <a href="https://flott.uz">Блог</a>
+      </div>
+      <div class="footer-col">
+        <p class="footer-col-title">Контакты</p>
+        <a class="footer-underlined" href="mailto:info@flott.uz">info@flott.uz</a>
+        <a class="footer-underlined" href="tel:+998712002021">+998 (71) 200-20-21</a>
+        <a class="footer-underlined" href="tel:+998908720880">+998 (90) 872-08-80</a>
+        <span>Ташкент, Узбекистан</span>
+      </div>
+      <div class="footer-social">
+        <a href="#" aria-label="Flott в LinkedIn">
+          <span class="footer-social-ic"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M4.98 3.5C4.98 4.88 3.87 6 2.5 6S0 4.88 0 3.5 1.12 1 2.5 1s2.48 1.12 2.48 2.5zM.24 8.31h4.52V23H.24zM8.34 8.31h4.33v2h.06c.6-1.14 2.08-2.34 4.28-2.34 4.58 0 5.42 3.01 5.42 6.92V23h-4.51v-7.11c0-1.7-.03-3.88-2.37-3.88-2.37 0-2.73 1.85-2.73 3.76V23H8.34z"/></svg></span>
+          <span>LinkedIn</span>
+        </a>
+        <a href="#" aria-label="Flott в Twitter">
+          <span class="footer-social-ic"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M23 4.94c-.83.37-1.72.62-2.65.73a4.63 4.63 0 0 0 2.03-2.55c-.9.53-1.88.9-2.94 1.11a4.62 4.62 0 0 0-7.87 4.21A13.1 13.1 0 0 1 2.05 3.7a4.6 4.6 0 0 0 1.43 6.16 4.6 4.6 0 0 1-2.09-.58v.06a4.62 4.62 0 0 0 3.7 4.52 4.63 4.63 0 0 1-2.08.08 4.62 4.62 0 0 0 4.31 3.2A9.26 9.26 0 0 1 .5 19.05a13.07 13.07 0 0 0 7.08 2.07c8.49 0 13.14-7.03 13.14-13.13l-.02-.6A9.4 9.4 0 0 0 23 4.94z"/></svg></span>
+          <span>Twitter</span>
+        </a>
+        <a href="#" aria-label="Flott в Facebook">
+          <span class="footer-social-ic"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M13.5 21.9v-9h3l.45-3.48h-3.45V7.2c0-1 .28-1.7 1.73-1.7h1.84V2.4c-.32-.04-1.41-.14-2.68-.14-2.65 0-4.47 1.62-4.47 4.6v2.56H7v3.48h2.92v9z"/></svg></span>
+          <span>Facebook</span>
+        </a>
       </div>
     </div>
     <div class="footer-bottom">
-      <span>© 2026 «FLOTT» MChJ. Все права защищены.</span>
-      <span>Госрегистрация ПО — Минюст РУз № DGU 57164</span>
+      <span>© 2026 Flott. Все права защищены.</span>
+      <nav class="footer-legal" aria-label="Юридические документы">
+        <a href="#">Политика конфиденциальности</a>
+        <a href="#">Условия использования</a>
+        <a href="#">Политика cookie</a>
+      </nav>
     </div>
   </div>
 </footer>

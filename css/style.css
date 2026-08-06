@@ -1707,13 +1707,14 @@ h3 {
      stays the animation's own — the frame's slightly taller card would ride
      the row up into the flott mark before the merge. */
   aspect-ratio: 416 / 453;
-  /* Купол света по центру верха — с читаемой кромкой, как в макете: дуга
-     видна, а не растворяется. Геометрия снята с макета: по центру купол
-     доходит до ~52% высоты карточки, у боковых краёв — до ~35%. Внутри купол
-     чуть темнеет к кромке, поле под ним темнеет к низу. */
+  /* Купол света по центру верха — кромка резкая: заливка ровная до самой
+     дуги, переход в прозрачность занимает ~1% радиуса (пара пикселей — только
+     на сглаживание). Геометрия снята с макета: по центру купол доходит до
+     ~52% высоты карточки, у боковых краёв — до ~35%. Поле под ним темнеет
+     к низу. */
   background:
     radial-gradient(ellipse 68% 52% at 50% 0%,
-      #f7fbff 0%, #eef4ff 85%, rgba(238, 244, 255, 0) 99%),
+      #f7fbff 0%, #f0f5ff 98.8%, rgba(240, 245, 255, 0) 100%),
     linear-gradient(180deg, #d0ddf8 0%, #b7ccf2 100%);
   /* Скругление в макете заметно крупнее прежнего: ~13% ширины карточки */
   border-radius: clamp(28px, 12%, 36px);
@@ -2683,67 +2684,130 @@ h3 {
 
 /* ---------- Footer ---------- */
 
+/* The frame drew the panel on a dark strip; here it sits straight on the white
+   page, and the pale blue tint is what separates it from the page. */
 .site-footer {
-  background: var(--black);
-  color: var(--white);
-  padding: clamp(64px, 8vw, 100px) 0 36px;
+  padding: 12px 0 16px;
 }
 
-.footer-top {
-  display: flex;
+.footer-card {
+  width: min(1400px, 100% - 24px);
+  margin-inline: auto;
+  background: #f1f5ff;
+  color: var(--black);
+  border-radius: clamp(28px, 3vw, 36px);
+  padding: clamp(44px, 6vw, 72px) clamp(28px, 7vw, 96px) clamp(28px, 4vw, 44px);
+}
+
+.footer-main {
+  display: grid;
+  grid-template-columns: minmax(230px, 1.25fr) repeat(3, auto) auto;
+  gap: clamp(28px, 4vw, 56px);
+  align-items: start;
   justify-content: space-between;
-  gap: 48px;
-  flex-wrap: wrap;
-  padding-bottom: 56px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  padding-bottom: clamp(36px, 5vw, 56px);
 }
 
-.footer-brand {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  color: var(--white);
-}
+.footer-brand { display: flex; align-items: center; gap: 10px; color: var(--blue); }
 
-.footer-brand .brand-mark { width: auto; height: 52px; color: var(--blue); }
+.footer-brand .brand-mark { width: auto; height: 34px; }
 
 .footer-word {
-  font-size: clamp(3rem, 6vw, 4.6rem);
+  font-size: 1.9rem;
   font-weight: 700;
-  letter-spacing: -0.04em;
+  letter-spacing: -0.03em;
   line-height: 1;
 }
 
-.footer-cols { display: flex; gap: clamp(48px, 7vw, 110px); }
+/* Подзаголовок из макета: тёмный, почти вплотную к чёрному, три строки */
+.footer-tagline {
+  margin-top: 22px;
+  max-width: 320px;
+  font-size: 1.02rem;
+  font-weight: 500;
+  line-height: 1.5;
+}
 
-.footer-col { display: flex; flex-direction: column; gap: 12px; }
+.footer-col { display: flex; flex-direction: column; gap: 11px; }
 
+/* В макете заголовки колонок обычным регистром и фирменным синим, не капсом */
 .footer-col-title {
-  font-size: 0.78rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
-  color: #8fadff;
-  margin-bottom: 6px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #1052f2;
+  margin-bottom: 8px;
 }
 
 .footer-col a,
 .footer-col span {
-  font-size: 0.95rem;
-  color: rgba(255, 255, 255, 0.68);
+  font-size: 0.9rem;
+  color: var(--black);
   transition: color 0.25s;
 }
 
-.footer-col a:hover { color: var(--white); }
+.footer-underlined { text-decoration: underline; text-underline-offset: 3px; }
+
+.footer-col a:hover { color: #1052f2; }
+
+/* Соцсети: синий круг + подпись справа, столбиком */
+.footer-social { display: flex; flex-direction: column; gap: 16px; }
+
+.footer-social a {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 0.9rem;
+  color: var(--black);
+  transition: color 0.25s;
+}
+
+.footer-social a:hover { color: #1052f2; }
+
+.footer-social-ic {
+  flex: 0 0 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: #1052f2;
+  color: var(--white);
+  display: grid;
+  place-items: center;
+}
+
+.footer-social-ic svg { width: 15px; height: 15px; }
 
 .footer-bottom {
   display: flex;
   justify-content: space-between;
+  align-items: center;
   flex-wrap: wrap;
-  gap: 12px;
-  padding-top: 32px;
+  gap: 14px 28px;
+  padding-top: clamp(20px, 3vw, 30px);
+  border-top: 1px solid #d5e0f5;
   font-size: 0.85rem;
-  color: rgba(255, 255, 255, 0.45);
+}
+
+.footer-legal { display: flex; flex-wrap: wrap; gap: 14px clamp(20px, 3.5vw, 44px); }
+
+.footer-legal a {
+  color: var(--black);
+  transition: color 0.25s;
+}
+
+.footer-legal a:hover { color: #1052f2; }
+
+/* Пять колонок не живут на планшете: бренд занимает всю строку, колонки
+   встают парами; на телефоне всё в один столбец */
+@media (max-width: 1024px) {
+  .footer-main {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    justify-content: start;
+  }
+  .footer-brand-block { grid-column: 1 / -1; }
+}
+
+@media (max-width: 560px) {
+  .footer-main { grid-template-columns: minmax(0, 1fr); }
+  .footer-bottom { flex-direction: column; align-items: flex-start; }
 }
 
 /* ---------- Reveal on scroll ---------- */
@@ -3028,8 +3092,6 @@ h3 {
 
   .chip { font-size: 0.78rem; padding: 10px 14px; }
   .chip-2 { bottom: 8%; }
-
-  .footer-top { flex-direction: column; }
 }
 
 /* ============================================================
@@ -3329,14 +3391,12 @@ h3 {
 /* Headline sits above the seam's bars; the tagline locks up under them on the
    seam, in the same white but held back so it reads as secondary. */
 
+/* Контейнер на весь герой: обе половины заголовка позиционируются в нём
+   абсолютно, по углам композиции из "Comp 4" */
 .ihero-head {
   position: absolute;
-  top: 14%;
-  left: 0;
-  right: 0;
+  inset: 0;
   z-index: 5;
-  padding: 0 20px;
-  text-align: center;
   pointer-events: none;
 }
 
@@ -3347,16 +3407,44 @@ h3 {
    ~30% wider than the English original it was translated from, so on a short
    screen a width-only clamp runs the second line straight under the invoice
    card. The vh term is what keeps the headline clear of it. */
+/* Размер снят с кадра 1920×1080: строки гротеска ~72px (3.75vw), курсивная
+   строка над ними крупнее (см. .serif-accent ниже). vh-часть держит заголовок
+   в кадре на коротких экранах. */
 .ihero-h1 {
   margin: 0;
   color: #fff;
   font-family: var(--font);
   font-weight: 400;
-  font-size: clamp(40px, min(7.4vw, 7.8vh), 96px);
-  line-height: 0.95;
+  font-size: clamp(30px, min(3.9vw, 6.6vh), 78px);
+  line-height: 1.02;
 }
 
 .ihero-h1 .line { display: block; }
+
+/* Голова фразы — верхний левый угол, на льду; хвост — нижний правый, на воде.
+   Позиции из кадра: 140/1920 и 250/1080 слева, 165/1920 и 115/1080 справа. */
+/* Ширина выставлена так, чтобы «замороженный счет» ломался на две строки,
+   как в кадре: «замороженный» помещается, вместе со «счет» — уже нет */
+.ihero-h1-left {
+  position: absolute;
+  left: 7.3%;
+  top: 21.5%;
+  display: block;
+  max-width: 31%;
+  text-align: left;
+}
+
+.ihero-h1-right {
+  position: absolute;
+  right: 8.3%;
+  bottom: 10.5%;
+  display: block;
+  text-align: right;
+}
+
+/* Курсивная строка в каждой половине крупнее гротеска — как в кадре, где обе
+   строки половины почти равны по ширине */
+.ihero-h1 .serif-accent { font-size: 1.3em; line-height: 1; }
 
 /* Playfair italic — the page's one display accent. Two places use it now: the
    hero's first line and the closing line in the contact panel. Only the face
@@ -3377,9 +3465,12 @@ h3 {
 }
 
 /* left is set from the wave in script.js, same as the badge */
+/* Под значком, по центру вьюпорта — в кадре блок стоит на 60% высоты и не
+   ездит по волне, поэтому left задан здесь, а не из script.js */
 .ihero-tagline {
   position: absolute;
-  top: calc(50% + 60px);
+  top: 59.5%;
+  left: 50%;
   z-index: 4;
   width: max-content;
   max-width: 92vw;
@@ -3387,18 +3478,26 @@ h3 {
   text-align: center;
   color: rgba(255, 255, 255, 0.9);
   font-weight: 500;
-  /* Above 980px the hero is three columns — card, tagline, card — and the two
-     cards are a fixed 300px sitting calc(20% - 120px) in from each edge, so
-     the strip left over is (60vw - 360px). Take another ~52px off it for the
-     swell, which can throw the seam 26px either way, and divide by the width
-     one character costs at this weight. Below 980px the cards are gone, so the
-     media query hands the tagline back a plain width-based size. */
-  font-size: clamp(26px, calc((60vw - 412px) / 6.4), 60px);
-  line-height: 0.95;
+  font-size: clamp(24px, 2.9vw, 56px);
+  line-height: 1.28;
   pointer-events: none;
 }
 
 .ihero-tagline span { display: block; }
+
+/* Значок на правом изгибе ленты: центр вьюпорта по горизонтали, 43.5% по
+   высоте — позиция и размер (236px на 1080-кадре) из "Comp 4" */
+.ihero-badge {
+  position: absolute;
+  left: 50%;
+  top: 43.5%;
+  z-index: 4;
+  width: clamp(120px, 12.3vw, 236px);
+  height: auto;
+  transform: translate(-50%, -50%);
+  filter: drop-shadow(0 22px 40px rgba(8, 28, 90, 0.35));
+  pointer-events: none;
+}
 
 /* ---------- Invoice → money morph ---------- */
 
@@ -3718,8 +3817,16 @@ h3 {
   .navbar.nav-open .nav-burger span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
 
   .ihero-tagline {
-    font-size: clamp(28px, 8vw, 44px);
+    font-size: clamp(24px, 6vw, 40px);
+    top: 61%;
   }
+
+  /* Углы композиции на телефоне сходятся к краям сильнее, а половины
+     заголовка не должны налезать на значок и подпись в центре */
+  .ihero-h1 { font-size: clamp(26px, 7vw, 40px); }
+  .ihero-h1-left { left: 6%; top: 16%; max-width: 70%; }
+  .ihero-h1-right { right: 6%; bottom: 9%; }
+  .ihero-badge { width: clamp(96px, 26vw, 150px); top: 41%; }
 }
 
 /* Mobile menu tap highlight — only where a real pointer can hover */
